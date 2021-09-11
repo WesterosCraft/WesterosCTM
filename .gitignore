@@ -1,0 +1,14 @@
+/bin
+/build
+/lib
+WesterosBlocks-*.jar
+.classpath
+/eclipse
+/.gradle
+/.settings
+/run
+.DS_Store
+/*_Client.launch
+/*_Server.launch
+/.project
+/Users/

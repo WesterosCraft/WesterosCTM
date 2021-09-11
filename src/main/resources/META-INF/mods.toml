@@ -1,0 +1,22 @@
+modLoader="javafml" #mandatory
+loaderVersion="[36,)"
+license="Apache Public License v2"
+
+[[mods]] #mandatory
+    modId="westerosctm" #mandatory
+    version="${file.jarVersion}" #mandatory
+    displayName="WesterosCTM" #mandatory
+    displayURL="https://www.westeroscraft.com/" #optional
+    #logoFile="westerosctm.jpg" #optional
+    authors="mikeprimm" #optional
+    credits="Design and code by mikeprimm"
+    description='''
+    This mod provides additional custom CTM types for ConnectedTextureMod
+    '''
+
+[[dependencies.westerosctm]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="[36,)" #mandatory
+    ordering="NONE"
+    side="BOTH"
