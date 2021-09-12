@@ -1,7 +1,6 @@
 package com.westeroscraft.westerosctm.types;
 
-import javax.annotation.Nonnull;
-
+import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.render.TextureWesterosCTM;
 
 import net.minecraft.block.BlockState;
@@ -13,25 +12,31 @@ import team.chisel.ctm.api.texture.ITextureType;
 import team.chisel.ctm.api.texture.TextureType;
 import team.chisel.ctm.api.util.TextureInfo;
 
-public enum TextureTypeWesterosCTM implements ITextureType {
-    @TextureType("westrrosctm")
-    INSTANCE;
-    
-    @Nonnull
-    private static final ITextureContext EMPTY_CONTEXT = () -> 0L;
-
-    @Override
-    public ICTMTexture<TextureTypeWesterosCTM> makeTexture(TextureInfo info){
-        return new TextureWesterosCTM(this, info);
+// Classic 47 texture CTM - files are base image + 46 additional images, following MCPatcher/Optifile tile order for CTM
+@TextureType("westerosctm")
+public class TextureTypeWesterosCTM implements ITextureType {
+	@Override
+    public ICTMTexture<? extends TextureTypeWesterosCTM> makeTexture(TextureInfo info) {
+      return new TextureWesterosCTM(this, info);
     }
 
     @Override
-    public ITextureContext getBlockRenderContext(BlockState state, IBlockReader world, BlockPos pos, ICTMTexture<?> tex){
-        return EMPTY_CONTEXT;
+    public ITextureContext getBlockRenderContext(BlockState state, IBlockReader world, BlockPos pos, ICTMTexture<?> tex) {
+        return new TextureContextWesterosCTM(state, world, pos, (TextureWesterosCTM) tex);
+     }
+
+    @Override
+    public int getQuadsPerSide() {
+        return 1;
     }
 
     @Override
-    public ITextureContext getContextFromData(long data){
-        return EMPTY_CONTEXT;
+    public int requiredTextures() {
+        return 47;
     }
+
+	@Override
+	public ITextureContext getContextFromData(long data) {
+		throw new UnsupportedOperationException();
+	}
 }
