@@ -8,7 +8,7 @@ This mod will not function without ConnectedTextureMod 1.16.5 installed.
 ## type='westerosctm'
 
 This type provides support for classic 47 image CTM.  This logically works akin to the standard 'ctm' type, but rather than being based on
-the 5 image compact CTM, this depends upon having the base image (as CTM image 0), along with 46 additional images listed in the     "textures" array.  For example,
+the 5 image compact CTM, this depends upon having 47 images listed in the "textures" array.  For example,
 
 <code>
 {
@@ -17,6 +17,7 @@ the 5 image compact CTM, this depends upon having the base image (as CTM image 0
     "type": "westerosctm",
     "layer": "SOLID",
     "textures": [
+      "westerosblocks:block/wood_black/144",
       "westerosblocks:block/wood_black/145",
       "westerosblocks:block/wood_black/146",
       "westerosblocks:block/wood_black/147",

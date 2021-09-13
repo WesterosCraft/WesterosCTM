@@ -32,7 +32,7 @@ public class TextureTypeWesterosCTM implements ITextureType {
 
     @Override
     public int requiredTextures() {
-        return 47;
+        return 48;
     }
 
 	@Override

@@ -142,7 +142,7 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
         final Quad quad = this.makeQuad(bakedQuad, context);
         final CTMLogic ctm = (context instanceof TextureContextWesterosCTM) ? ((TextureContextWesterosCTM) context).getCTM(bakedQuad.getDirection()) : null;
         final int txtidx = getSpriteIndex(ctm);
-        return Collections.singletonList(quad.transformUVs(this.sprites[txtidx], Submap.X1).rebake());
+        return Collections.singletonList(quad.transformUVs(this.sprites[txtidx+1], Submap.X1).rebake());
     }
 
     @Override
