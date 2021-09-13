@@ -11,7 +11,6 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import team.chisel.ctm.api.texture.ITextureContext;
-import team.chisel.ctm.client.texture.render.TextureCTM;
 import team.chisel.ctm.client.util.CTMLogic;
 
 public class TextureContextWesterosCTM implements ITextureContext {

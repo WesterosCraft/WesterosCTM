@@ -14,7 +14,6 @@ import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.util.Direction;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.util.TextureInfo;
-import team.chisel.ctm.client.texture.ctx.TextureContextCTM;
 import team.chisel.ctm.client.texture.render.AbstractTexture;
 import team.chisel.ctm.client.util.BlockstatePredicateParser;
 import team.chisel.ctm.client.util.CTMLogic;
@@ -25,7 +24,6 @@ import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
 import team.chisel.ctm.client.util.CTMLogic.StateComparisonCallback;
 
-import com.westeroscraft.westerosctm.WesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.types.TextureTypeWesterosCTM;
 
@@ -104,7 +102,7 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
         }
     }
 
-    // Map texture using CTM method (bit - 0: left, 1:down-left, 2:down, 3:down-right, 4:right, 5:up-right, 6:up, 7:up-left
+    // Map texture using CTM method (bit - 0: left, 1:up-left, 2:up, 3:up-right, 4:right, 5:down-right, 6:down, 7:down-left
     private static final int[] neighborMapCtm = new int[]{
         0, 3, 0, 3, 12, 5, 12, 15, 0, 3, 0, 3, 12, 5, 12, 15,
         1, 2, 1, 2, 4, 7, 4, 29, 1, 2, 1, 2, 13, 31, 13, 14,
@@ -124,18 +122,18 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
         37, 38, 37, 38, 30, 11, 30, 32, 37, 38, 37, 38, 25, 33, 25, 26,
     };
     
-    private int getSpriteIndex(CTMLogic logic) {
+    protected int getSpriteIndex(CTMLogic logic) {
         if (logic == null) {
             return 0;
         }
         int index = (logic.connected(Dir.LEFT) ? 1 : 0) +
-        		(logic.connected(Dir.TOP_LEFT) ? 2 : 0) +
-        		(logic.connected(Dir.TOP) ? 4 : 0) +
-        		(logic.connected(Dir.TOP_RIGHT) ? 8 : 0) +
+        		(logic.connected(Dir.BOTTOM_LEFT) ? 2 : 0) +
+        		(logic.connected(Dir.BOTTOM) ? 4 : 0) +
+        		(logic.connected(Dir.BOTTOM_RIGHT) ? 8 : 0) +
         		(logic.connected(Dir.RIGHT) ? 16 : 0) +
-        		(logic.connected(Dir.BOTTOM_RIGHT) ? 32 : 0) +
-        		(logic.connected(Dir.BOTTOM) ? 64 : 0) +
-        		(logic.connected(Dir.BOTTOM_LEFT) ? 128 : 0);
+        		(logic.connected(Dir.TOP_RIGHT) ? 32 : 0) +
+        		(logic.connected(Dir.TOP) ? 64 : 0) +
+        		(logic.connected(Dir.TOP_LEFT) ? 128 : 0);
         return neighborMapCtm[index];    	
     }
 
@@ -144,7 +142,6 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
         final Quad quad = this.makeQuad(bakedQuad, context);
         final CTMLogic ctm = (context instanceof TextureContextWesterosCTM) ? ((TextureContextWesterosCTM) context).getCTM(bakedQuad.getDirection()) : null;
         final int txtidx = getSpriteIndex(ctm);
-        WesterosCTM.LOGGER.info("txtidx=" + txtidx);
         return Collections.singletonList(quad.transformUVs(this.sprites[txtidx], Submap.X1).rebake());
     }
 
