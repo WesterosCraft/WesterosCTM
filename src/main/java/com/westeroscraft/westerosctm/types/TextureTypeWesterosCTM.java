@@ -13,7 +13,7 @@ import team.chisel.ctm.api.texture.TextureType;
 import team.chisel.ctm.api.util.TextureInfo;
 
 // Classic 47 texture CTM - files are base image + 46 additional images, following MCPatcher/Optifile tile order for CTM
-@TextureType("westerosctm")
+@TextureType("westeros_ctm")
 public class TextureTypeWesterosCTM implements ITextureType {
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCTM> makeTexture(TextureInfo info) {
