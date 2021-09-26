@@ -122,7 +122,7 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
         37, 38, 37, 38, 30, 11, 30, 32, 37, 38, 37, 38, 25, 33, 25, 26,
     };
     
-    protected int getSpriteIndex(CTMLogic logic) {
+    public int getSpriteIndex(CTMLogic logic) {
         if (logic == null) {
             return 0;
         }
