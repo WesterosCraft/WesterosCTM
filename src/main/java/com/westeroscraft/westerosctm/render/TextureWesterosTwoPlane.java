@@ -1,8 +1,8 @@
 package com.westeroscraft.westerosctm.render;
 
 import com.westeroscraft.westerosctm.types.TextureTypeWesterosTwoPlane;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.util.Direction;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.core.Direction;
 import team.chisel.ctm.api.texture.ISubmap;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.util.TextureInfo;

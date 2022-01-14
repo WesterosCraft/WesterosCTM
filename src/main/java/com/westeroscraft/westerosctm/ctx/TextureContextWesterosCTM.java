@@ -6,10 +6,10 @@ import javax.annotation.Nonnull;
 
 import com.westeroscraft.westerosctm.render.TextureWesterosCTM;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.BlockGetter;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.client.util.CTMLogic;
 
@@ -21,7 +21,7 @@ public class TextureContextWesterosCTM implements ITextureContext {
 
     private long data;
 
-    public TextureContextWesterosCTM(@Nonnull BlockState state, IBlockReader world, BlockPos pos, TextureWesterosCTM tex) {
+    public TextureContextWesterosCTM(@Nonnull BlockState state, BlockGetter world, BlockPos pos, TextureWesterosCTM tex) {
     	this.tex = tex;
     	
         for (Direction face : Direction.values()) {

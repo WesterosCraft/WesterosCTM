@@ -2,7 +2,7 @@ package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.render.TextureWesterosTwoPlane;
 
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 import team.chisel.ctm.api.texture.ICTMTexture;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.texture.TextureType;

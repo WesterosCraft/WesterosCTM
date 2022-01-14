@@ -18,11 +18,11 @@ apply plugin: 'maven-publish'
 
 def repo = Grgit.open(project.file('.'))
 
-version = '0.1'
+version = '0.2'
 group = 'com.westeroscraft.westerosctm'
 archivesBaseName = 'WesterosCTM'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17) // 17 for 1.18+
 
 repositories {
     maven { // CTM
@@ -32,7 +32,7 @@ repositories {
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'official', version: '1.18'
     runs {
         client {
             workingDirectory project.file('run')
@@ -63,12 +63,12 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.4'
+    minecraft 'net.minecraftforge:forge:1.18-38.0.17'
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
     // compile "some.group:artifact:version"
-    implementation fg.deobf("team.chisel.ctm:CTM:MC1.16.1-${ctm_version}")
+    implementation fg.deobf("team.chisel.ctm:CTM:1.18-${ctm_version}")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

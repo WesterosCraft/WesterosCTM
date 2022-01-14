@@ -3,9 +3,10 @@ package com.westeroscraft.westerosctm.types;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTMPattern;
 import com.westeroscraft.westerosctm.render.TextureWesterosCTMPattern;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
 import team.chisel.ctm.api.texture.ICTMTexture;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.texture.TextureType;
@@ -20,7 +21,7 @@ public class TextureTypeWesterosCTMPattern extends TextureTypeWesterosCTMSingle 
 		return new TextureWesterosCTMPattern(this, info);
 	}
     @Override
-    public ITextureContext getBlockRenderContext(BlockState state, IBlockReader world, BlockPos pos, ICTMTexture<?> tex) {
+    public ITextureContext getBlockRenderContext(BlockState state, BlockGetter world, BlockPos pos, ICTMTexture<?> tex) {
         return new TextureContextWesterosCTMPattern(state, world, pos, (TextureWesterosCTMPattern) tex);
      }
 

@@ -9,11 +9,13 @@ import com.westeroscraft.westerosctm.WesterosCTM;
 import com.westeroscraft.westerosctm.render.TextureWesterosCTM;
 import com.westeroscraft.westerosctm.render.TextureWesterosCTMPattern;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.BlockGetter;
+import team.chisel.ctm.api.texture.ITextureContext;
+import team.chisel.ctm.client.util.CTMLogic;
+import net.minecraft.core.Direction.Axis;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.client.texture.ctx.TextureContextGrid.Point2i;
 import team.chisel.ctm.client.util.CTMLogic;
@@ -28,7 +30,7 @@ public class TextureContextWesterosCTMPattern implements ITextureContext {
 
     private long data;
 
-    public TextureContextWesterosCTMPattern(@Nonnull BlockState state, IBlockReader world, BlockPos pos, TextureWesterosCTMPattern tex) {
+    public TextureContextWesterosCTMPattern(@Nonnull BlockState state, BlockGetter world, BlockPos pos, TextureWesterosCTMPattern tex) {
     	this.tex = tex;
 
         // Since we can only return a long, we must limit to 10 bits of data per face = 60 bits

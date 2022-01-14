@@ -3,7 +3,7 @@ package com.westeroscraft.westerosctm.render;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.util.TextureInfo;
 import team.chisel.ctm.client.util.CTMLogic;
