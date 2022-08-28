@@ -18,7 +18,8 @@ apply plugin: 'maven-publish'
 
 def repo = Grgit.open(project.file('.'))
 
-version = '0.3'
+version = "v1.18.2-0.3.${System.getenv().BUILD_NUMBER ?: 'Dev'}"
+
 group = 'com.westeroscraft.westerosctm'
 archivesBaseName = 'WesterosCTM'
 

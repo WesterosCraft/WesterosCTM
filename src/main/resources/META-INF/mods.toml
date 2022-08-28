@@ -1,5 +1,5 @@
 modLoader="javafml" #mandatory
-loaderVersion="[36,)"
+loaderVersion="[40,)"
 license="Apache Public License v2"
 
 [[mods]] #mandatory
@@ -17,6 +17,6 @@ license="Apache Public License v2"
 [[dependencies.westerosctm]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[36,)" #mandatory
+    versionRange="[40,)" #mandatory
     ordering="NONE"
     side="BOTH"
