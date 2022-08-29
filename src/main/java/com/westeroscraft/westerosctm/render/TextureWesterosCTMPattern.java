@@ -7,7 +7,6 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import team.chisel.ctm.api.texture.ISubmap;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.util.TextureInfo;
-import team.chisel.ctm.client.texture.ctx.TextureContextGrid;
 import team.chisel.ctm.client.texture.ctx.TextureContextGrid.Point2i;
 import team.chisel.ctm.client.util.CTMLogic;
 import team.chisel.ctm.client.util.Quad;
@@ -15,7 +14,6 @@ import team.chisel.ctm.client.util.Submap;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
-import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTMPattern;
 import com.westeroscraft.westerosctm.types.TextureTypeWesterosCTMPattern;
 

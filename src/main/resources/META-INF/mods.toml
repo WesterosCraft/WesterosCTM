@@ -20,3 +20,9 @@ license="Apache Public License v2"
     versionRange="[40,)" #mandatory
     ordering="NONE"
     side="BOTH"
+[[dependencies.westerosctm]] #optional
+    modId="ctm" #mandatory
+    mandatory=true #mandatory
+    versionRange="[1.18.2,)" #mandatory
+    ordering="NONE"
+    side="BOTH"

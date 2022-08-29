@@ -5,8 +5,6 @@ import java.util.EnumMap;
 import javax.annotation.Nonnull;
 
 import com.google.common.base.Preconditions;
-import com.westeroscraft.westerosctm.WesterosCTM;
-import com.westeroscraft.westerosctm.render.TextureWesterosCTM;
 import com.westeroscraft.westerosctm.render.TextureWesterosCTMPattern;
 
 import net.minecraft.core.Direction;
@@ -16,9 +14,7 @@ import net.minecraft.world.level.BlockGetter;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.client.util.CTMLogic;
 import net.minecraft.core.Direction.Axis;
-import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.client.texture.ctx.TextureContextGrid.Point2i;
-import team.chisel.ctm.client.util.CTMLogic;
 import team.chisel.ctm.client.util.FaceOffset;
 
 public class TextureContextWesterosCTMPattern implements ITextureContext {
