@@ -4,7 +4,7 @@ license="Apache Public License v2"
 
 [[mods]] #mandatory
     modId="westerosctm" #mandatory
-    version="${file.jarVersion}" #mandatory
+    version="${version}" #mandatory
     displayName="WesterosCTM" #mandatory
     displayURL="https://www.westeroscraft.com/" #optional
     #logoFile="westerosctm.jpg" #optional

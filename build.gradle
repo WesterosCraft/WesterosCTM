@@ -18,7 +18,7 @@ apply plugin: 'maven-publish'
 
 def repo = Grgit.open(project.file('.'))
 
-version = "v1.18.2-0.3.${System.getenv().BUILD_NUMBER ?: 'Dev'}"
+version = "1.18.2-0.3.${System.getenv().BUILD_NUMBER ?: 'Dev'}"
 
 group = 'com.westeroscraft.westerosctm'
 archivesBaseName = 'WesterosCTM'
@@ -64,7 +64,7 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.1.73'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.74'
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
@@ -85,6 +85,16 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+}
+
+processResources {
+    with copySpec {
+    	duplicatesStrategy = 'include'
+        from (sourceSets.main.resources.srcDirs) {
+    	    include 'META-INF/mods.toml'
+        	expand 'version': project.version
+    	}
+	}
 }
 
 // Example configuration to allow publishing using the maven-publish task
