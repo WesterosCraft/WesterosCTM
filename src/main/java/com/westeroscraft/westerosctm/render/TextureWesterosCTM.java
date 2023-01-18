@@ -76,8 +76,6 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
 		}
 	}
 
-	private final Map<CacheKey, Object2ByteMap<BlockState>> connectionCache = new HashMap<>();
-
     public TextureWesterosCTM(TextureTypeWesterosCTM type, TextureInfo info) {
         super(type, info);
         this.connectInside = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "connect_inside"));
@@ -86,19 +84,10 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
     }
     
     public boolean connectTo(CTMLogic ctm, BlockState from, BlockState to, Direction dir) {
-        synchronized (connectionCache) {
-        	Object2ByteMap<BlockState> sidecache = connectionCache.computeIfAbsent(new CacheKey(from, dir), 
-				k -> {
-					Object2ByteMap<BlockState> map = new Object2ByteOpenCustomHashMap<>(new IdentityStrategy<>());
-					map.defaultReturnValue((byte) -1);
-					return map;
-				});
-
-        	byte cached = sidecache.getByte(to);
-            if (cached == -1) {
-                sidecache.put(to, cached = (byte) ((connectionChecks == null ? StateComparisonCallback.DEFAULT.connects(ctm, from, to, dir) : connectionChecks.test(dir, to)) ? 1 : 0));
-            }
-            return cached == 1;
+        try {
+            return ((connectionChecks == null ? StateComparisonCallback.DEFAULT.connects(ctm, from, to, dir) : connectionChecks.test(dir, to)) ? 1 : 0) == 1;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
