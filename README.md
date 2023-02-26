@@ -153,3 +153,23 @@ type.
 }
 </code>
 
+## type='westeros_pillar'
+
+This is a trivial subclass of 'pillar' that includes a fix for texture rotation errors in the version of 'pillar' in 1.18.2 and earlier.  It
+should not be needed once this fix is back-ported, but using this class will not cause a problem even when that does occur.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_pillar",
+    "layer": "SOLID",
+    "textures": [
+      "westerosblocks:block/ctm/pillar_2x2"
+    ],
+    "extra": {
+    }
+  }
+}
+</code>
+
