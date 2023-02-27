@@ -30,11 +30,11 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
     public TextureWesterosPillar(TextureTypeWesterosPillar type, TextureInfo info) {
         super(type, info);
     }
-    @Override
+    //@Override
     // Patch from 1.19.2 CTM
-    protected Quad makeQuad(BakedQuad bq, ITextureContext context) {
-        return super.makeQuad(bq, context).derotate();
-    }
+    //protected Quad makeQuad(BakedQuad bq, ITextureContext context) {
+    //    return super.makeQuad(bq, context).derotate();
+    //}
     
     @Override
     public List<BakedQuad> transformQuad(BakedQuad quad, ITextureContext context, int quadGoal) {
@@ -49,94 +49,28 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
 
     private BakedQuad getQuad(BakedQuad in, ITextureContext context) {
         Quad q = makeQuad(in, context);
-        TextureContextWesterosPillar.ConnectionData data = ((TextureContextWesterosPillar)context).getData();
-        TextureContextWesterosPillar.Connections cons = data.getConnections();
-        
-        // This is the order of operations for connections
-        EnumSet<Direction> realConnections = EnumSet.copyOf(data.getConnections().getConnections());
-        if (cons.connectedOr(UP, DOWN)) {
-            // If connected up or down, ignore all other connections
-            realConnections.removeIf(f -> f.getAxis().isHorizontal());
-        } else if (cons.connectedOr(EAST, WEST)) {
-            // If connected east or west, ignore any north/south connections, and any connections that are already connected up or down
-            realConnections.removeIf(f -> f == NORTH || f == SOUTH);
-            realConnections.removeIf(f -> blockConnectionZ(f, data));
-        } else {
-            // Otherwise, remove every connection that is already connected to something else
-            realConnections.removeIf(f -> blockConnectionY(f, data));
-        }
-
-        // Replace our initial connection data with the new info
-        cons = new TextureContextWesterosPillar.Connections(realConnections);
-
-        int rotation = 0;
-        ISubmap uvs = Submap.X2[0][0];
-        if (in.getDirection().getAxis().isHorizontal() && cons.connectedOr(UP, DOWN)) {
-            uvs = getUVs(UP, DOWN, cons);
-        } else if (cons.connectedOr(EAST, WEST)) {
-            rotation = 1;
-            uvs = getUVs(EAST, WEST, cons);
-        } else if (cons.connectedOr(NORTH, SOUTH)) {
-            uvs = getUVs(NORTH, SOUTH, cons);
-            if (in.getDirection() == DOWN) {
-                rotation += 2;
-            }
-        }
-
-        boolean connected = !cons.getConnections().isEmpty();
-
-        // Side textures need to be rotated to look correct
-        if (connected && !cons.connectedOr(UP, DOWN)) {
-            if (in.getDirection() == EAST) {
-                rotation += 1;
-            }
-            if (in.getDirection() == NORTH) {
-                rotation += 2;
-            }
-            if (in.getDirection() == WEST) {
-                rotation += 3;
-            }
-        }
-
-        // If there is a connection opposite this side, it is an end-cap, so render as unconnected
-        if (cons.connected(in.getDirection().getOpposite())) {
-            connected = false;
-        }
-        // If there are no connections at all, and this is not the top or bottom, render the "short" column texture
-        if (cons.getConnections().isEmpty() && in.getDirection().getAxis().isHorizontal()) {
-            connected = true;
-        }
-        
-        q = q.rotate(rotation);
-        if (connected) {
-            return q.transformUVs(sprites[1], uvs).rebake();
-        }
-        return q.transformUVs(sprites[0]).rebake();
-    }
-    
-    private ISubmap getUVs(Direction face1, Direction face2, TextureContextWesterosPillar.Connections cons) {
+        TextureContextWesterosPillar ctx = (TextureContextWesterosPillar) context;
+        int axis = ctx.getAxis();
+        boolean connUp = ctx.getConnectUp();
+        boolean connDown = ctx.getConnectDown();
+        // Compute UV for which image to get
         ISubmap uvs;
-        if (cons.connectedAnd(face1, face2)) {
-            uvs = Submap.X2[1][0];
-        } else {
-            if (cons.connected(face1)) {
-                uvs = Submap.X2[1][1];
-            } else {
-                uvs = Submap.X2[0][1];
-            }
+        if (connUp) {
+        	if (connDown) {
+                uvs = Submap.X2[1][0];	// Use both image        		
+        	}
+        	else {
+                uvs = Submap.X2[1][1];  // Bottom image      		
+        	}
         }
-        return uvs;
-    }
-    private boolean blockConnectionY(Direction dir, TextureContextWesterosPillar.ConnectionData data) {
-        return blockConnection(dir, Axis.Y, data) || blockConnection(dir, dir.getClockWise().getAxis(), data);
-    }
-
-    private boolean blockConnectionZ(Direction dir, TextureContextWesterosPillar.ConnectionData data) {
-        return blockConnection(dir, Axis.Z, data);
-    }
-
-    private boolean blockConnection(Direction dir, Axis axis, TextureContextWesterosPillar.ConnectionData data) {
-        Direction rot = DirectionHelper.rotateAround(dir, axis);
-        return data.getConnections(dir).connectedOr(rot, rot.getOpposite());
+        else {
+        	if (connDown) {
+                uvs = Submap.X2[0][1];  // Top image      		
+        	}
+        	else {
+                uvs = Submap.X2[0][0];	// Neither        		
+        	}
+        }
+        return q.transformUVs(sprites[1], uvs).rebake();
     }
 }

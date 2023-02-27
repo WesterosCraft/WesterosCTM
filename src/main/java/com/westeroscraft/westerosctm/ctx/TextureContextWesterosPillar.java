@@ -18,146 +18,68 @@ import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Map;
+import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.ObjectArrays;
+import com.westeroscraft.westerosctm.WesterosCTM;
 
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.client.util.ConnectionLocations;
 
 public class TextureContextWesterosPillar implements ITextureContext {
-
-    private static final ConnectionLocations[] MAIN_VALUES = { UP, DOWN, NORTH, SOUTH, EAST, WEST };
-    private static final ConnectionLocations[] OFFSET_VALUES = ArrayUtils.removeElements(ConnectionLocations.VALUES, ObjectArrays.concat(
-            new ConnectionLocations[] { NORTH_EAST_UP, NORTH_EAST_DOWN, NORTH_WEST_UP, NORTH_WEST_DOWN, SOUTH_WEST_UP, SOUTH_WEST_DOWN, SOUTH_EAST_UP, SOUTH_EAST_DOWN, },
-            MAIN_VALUES,
-            ConnectionLocations.class
-    ));
-    private static final ConnectionLocations[] ALL_VALUES = ObjectArrays.concat(MAIN_VALUES, OFFSET_VALUES, ConnectionLocations.class);
-
-    public static class Connections {
-        
-        private EnumSet<Direction> connections;        
-        
-        public Connections(EnumSet<Direction> connections) {
-        	this.connections = connections;
-        }
-        
-        public boolean connected(Direction facing) {
-            return connections.contains(facing);
-        }
-        
-        public boolean connectedAnd(Direction... facings) {
-            for (Direction f : facings) {
-                if (!connected(f)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        
-        public boolean connectedOr(Direction... facings) {
-            for (Direction f : facings) {
-                if (connected(f)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        public static Connections forPos(BlockGetter world, BlockPos pos) {
-            BlockState state = world.getBlockState(pos);
-            return forPos(world, state, pos);
-        }
-
-        public static Connections forData(long data, Direction offset) {
-            EnumSet<Direction> connections = EnumSet.noneOf(Direction.class);
-            if (offset == null) {
-                for (ConnectionLocations loc : MAIN_VALUES) {
-                    if ((data & loc.getMask()) != 0) {
-                        connections.add(ConnectionLocations.toFacing(loc));
-                    }
-                }
-            } else {
-                for (ConnectionLocations loc : OFFSET_VALUES) {
-                    if ((data & loc.getMask()) != 0) {
-                        Direction facing = loc.clipOrDestroy(offset);
-                        if (facing != null) {
-                            connections.add(facing);
-                        }
-                    }
-                }
-            }
-            return new Connections(connections);
-        }
-
-        public static Connections forPos(BlockGetter world, BlockState baseState, BlockPos pos) {
-            EnumSet<Direction> connections = EnumSet.noneOf(Direction.class);
-            BlockState state = world.getBlockState(pos);
-            if (state == baseState) {
-                for (Direction f : Direction.values()) {
-                    if (world.getBlockState(pos.relative(f)) == baseState) {
-                        connections.add(f);
-                    }
-                }
-            }
-            return new Connections(connections);
-        }
-        public EnumSet<Direction> getConnections() { return connections; }
-
-    }
-
-    public static class ConnectionData {
-
-        private Connections connections;
-        private Map<Direction, Connections> connectionConnections = new EnumMap<>(Direction.class);
-
-        public ConnectionData(BlockGetter world, BlockPos pos) {
-            connections = Connections.forPos(world, pos);
-            BlockState state = world.getBlockState(pos);
-            for (Direction f : Direction.values()) {
-                connectionConnections.put(f, Connections.forPos(world, state, pos.relative(f)));
-            }
-        }
-
-        public Connections getConnections() { return connections; }
-        
-        public ConnectionData(long data){
-            connections = Connections.forData(data, null);
-            for (Direction f : Direction.values()){
-                connectionConnections.put(f, Connections.forData(data, f));
-            }
-        }
-
-        public Connections getConnections(Direction facing) {
-            return connectionConnections.get(facing);
-        }
-    }
-
-    private ConnectionData data;
-
-    private long compressedData;
+    public static final int AXIS_X = 1;
+    public static final int AXIS_Y = 2;
+    public static final int AXIS_Z = 3;
+    public static final int AXIS_BITS = 0x3;
+    
+    public static final int CONNECT_UP = 1 << 2;
+    public static final int CONNECT_DOWN = 1 << 3;
+    
+    
+    private long compressedData; // == AXIS_BITS, CONNECT_UP, CONNECT_DOWN
     
     public TextureContextWesterosPillar(BlockGetter world, BlockPos pos) {
-        data = new ConnectionData(world, pos);
-
         BlockState state = world.getBlockState(pos);
-        for (ConnectionLocations loc : ALL_VALUES) {
-            if (state == world.getBlockState(loc.transform(pos))){
-                compressedData = compressedData | loc.getMask();
-            }
+        int axisValue = AXIS_Y;	// Assume Y
+        Optional<Axis> axis = state.getOptionalValue(RotatedPillarBlock.AXIS);
+        Axis a = Axis.Y;	// Default
+        if (axis.isPresent()) {
+        	a = axis.get();
+        	if (a == Axis.X) axisValue = AXIS_X;
+        	if (a == Axis.Z) axisValue = AXIS_Z;
         }
+        // Get up/down connections, based on orientation
+        boolean upConn = false, downConn = false;
+        if (axisValue == AXIS_Y) {
+        	upConn = (state == world.getBlockState(UP.transform(pos)));
+        	downConn = (state == world.getBlockState(DOWN.transform(pos)));
+        }
+        else if (axisValue == AXIS_X) {
+        	upConn = (state == world.getBlockState(EAST.transform(pos)));
+        	downConn = (state == world.getBlockState(WEST.transform(pos)));        	
+        }
+        else {
+        	upConn = (state == world.getBlockState(NORTH.transform(pos)));
+        	downConn = (state == world.getBlockState(SOUTH.transform(pos)));        	        	
+        }
+        compressedData = (axisValue & AXIS_BITS) | (upConn ? CONNECT_UP : 0) | (downConn ? CONNECT_DOWN : 0);
+        WesterosCTM.LOGGER.warn(String.format("pos=%1$s, axis=%2$s,upConn=%3$s,downConn=%4$s", pos.toString(), a, upConn, downConn));
     }
 
-    public ConnectionData getData() { return data; }
+    public int getAxis() { return (int)(compressedData & AXIS_BITS); }
+    public boolean getConnectUp() { return ((compressedData & CONNECT_UP) == CONNECT_UP) ? true : false; }
+    public boolean getConnectDown() { return ((compressedData & CONNECT_DOWN) == CONNECT_DOWN) ? true : false; }
     
     public TextureContextWesterosPillar(long data){
-        this.data = new ConnectionData(data);
+    	this.compressedData = data;
     }
 
     @Override

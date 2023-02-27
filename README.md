@@ -155,8 +155,9 @@ type.
 
 ## type='westeros_pillar'
 
-This is a trivial subclass of 'pillar' that includes a fix for texture rotation errors in the version of 'pillar' in 1.18.2 and earlier.  It
-should not be needed once this fix is back-ported, but using this class will not cause a problem even when that does occur.
+This is an alternative to the 'pillar' method that specifically leverages the AXIS property
+to reliably determine the orientation of RotatedPillarBlock subclasses (such as logs and pillars).  If used
+on a block that lacks the AXIS property, the block will be treated as being upright (axis=y), connecting vertically.
 
 <code>
 {
