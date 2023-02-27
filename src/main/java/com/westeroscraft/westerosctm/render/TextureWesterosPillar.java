@@ -9,17 +9,14 @@ import net.minecraft.core.Direction.Axis;
 import team.chisel.ctm.api.texture.ISubmap;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.util.TextureInfo;
-import team.chisel.ctm.client.texture.ctx.TextureContextPillar;
-import team.chisel.ctm.client.texture.ctx.TextureContextPillar.ConnectionData;
-import team.chisel.ctm.client.texture.ctx.TextureContextPillar.Connections;
 import team.chisel.ctm.client.texture.render.AbstractTexture;
-import team.chisel.ctm.client.texture.render.TexturePillar;
-import team.chisel.ctm.client.texture.type.TextureTypePillar;
 import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
 import team.chisel.ctm.client.util.DirectionHelper;
 
 import com.google.common.collect.Lists;
+import com.westeroscraft.westerosctm.types.TextureTypeWesterosPillar;
+import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
 
 import static net.minecraft.core.Direction.DOWN;
 import static net.minecraft.core.Direction.EAST;
@@ -29,8 +26,8 @@ import static net.minecraft.core.Direction.UP;
 import static net.minecraft.core.Direction.WEST;
 
 // Most code here is modified version ot TexturePillar
-public class TextureWesterosPillar extends AbstractTexture<TextureTypePillar> {
-    public TextureWesterosPillar(TextureTypePillar type, TextureInfo info) {
+public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPillar> {
+    public TextureWesterosPillar(TextureTypeWesterosPillar type, TextureInfo info) {
         super(type, info);
     }
     @Override
@@ -52,8 +49,8 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypePillar> {
 
     private BakedQuad getQuad(BakedQuad in, ITextureContext context) {
         Quad q = makeQuad(in, context);
-        ConnectionData data = ((TextureContextPillar)context).getData();
-        Connections cons = data.getConnections();
+        TextureContextWesterosPillar.ConnectionData data = ((TextureContextWesterosPillar)context).getData();
+        TextureContextWesterosPillar.Connections cons = data.getConnections();
         
         // This is the order of operations for connections
         EnumSet<Direction> realConnections = EnumSet.copyOf(data.getConnections().getConnections());
@@ -70,7 +67,7 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypePillar> {
         }
 
         // Replace our initial connection data with the new info
-        cons = new Connections(realConnections);
+        cons = new TextureContextWesterosPillar.Connections(realConnections);
 
         int rotation = 0;
         ISubmap uvs = Submap.X2[0][0];
@@ -117,7 +114,7 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypePillar> {
         return q.transformUVs(sprites[0]).rebake();
     }
     
-    private ISubmap getUVs(Direction face1, Direction face2, Connections cons) {
+    private ISubmap getUVs(Direction face1, Direction face2, TextureContextWesterosPillar.Connections cons) {
         ISubmap uvs;
         if (cons.connectedAnd(face1, face2)) {
             uvs = Submap.X2[1][0];
@@ -130,15 +127,15 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypePillar> {
         }
         return uvs;
     }
-    private boolean blockConnectionY(Direction dir, ConnectionData data) {
+    private boolean blockConnectionY(Direction dir, TextureContextWesterosPillar.ConnectionData data) {
         return blockConnection(dir, Axis.Y, data) || blockConnection(dir, dir.getClockWise().getAxis(), data);
     }
 
-    private boolean blockConnectionZ(Direction dir, ConnectionData data) {
+    private boolean blockConnectionZ(Direction dir, TextureContextWesterosPillar.ConnectionData data) {
         return blockConnection(dir, Axis.Z, data);
     }
 
-    private boolean blockConnection(Direction dir, Axis axis, ConnectionData data) {
+    private boolean blockConnection(Direction dir, Axis axis, TextureContextWesterosPillar.ConnectionData data) {
         Direction rot = DirectionHelper.rotateAround(dir, axis);
         return data.getConnections(dir).connectedOr(rot, rot.getOpposite());
     }
