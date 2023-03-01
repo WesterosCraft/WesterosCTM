@@ -11,27 +11,21 @@ import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
 
 import com.google.common.collect.Lists;
-import com.westeroscraft.westerosctm.types.TextureTypeWesterosPillar;
+import com.westeroscraft.westerosctm.types.TextureTypeWesterosVertical;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
 
 // Most code here is modified version ot TexturePillar
-public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPillar> {
-    public TextureWesterosPillar(TextureTypeWesterosPillar type, TextureInfo info) {
+public class TextureWesterosVertical extends AbstractTexture<TextureTypeWesterosVertical> {
+    public TextureWesterosVertical(TextureTypeWesterosVertical type, TextureInfo info) {
         super(type, info);
-    }
-    //@Override
-    // Patch from 1.19.2 CTM
-    //protected Quad makeQuad(BakedQuad bq, ITextureContext context) {
-    //    return super.makeQuad(bq, context).derotate();
-    //}
-    
+    }    
     @Override
     public List<BakedQuad> transformQuad(BakedQuad quad, ITextureContext context, int quadGoal) {
         if (context == null) {
             if (quad.getDirection() != null && quad.getDirection().getAxis().isVertical()) {
                 return Lists.newArrayList(makeQuad(quad, context).transformUVs(sprites[0]).rebake());
             }
-            return Lists.newArrayList(makeQuad(quad, context).transformUVs(sprites[1], Submap.X2[0][0]).rebake());
+            return Lists.newArrayList(makeQuad(quad, context).transformUVs(sprites[0], Submap.X2[0][0]).rebake());
         }
         return Lists.newArrayList(getQuad(quad, context));
     }
@@ -60,6 +54,6 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
                 uvs = Submap.X2[0][0];	// Neither        		
         	}
         }
-        return q.transformUVs(sprites[1], uvs).rebake();
+        return q.transformUVs(sprites[0], uvs).rebake();
     }
 }

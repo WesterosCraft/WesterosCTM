@@ -174,3 +174,22 @@ on a block that lacks the AXIS property, the block will be treated as being upri
 }
 </code>
 
+## type='westeros_vertical'
+
+This is an alternative to the 'ctm_vertical' method that handles crossed and rotated models better than
+the standard one (particularly for stacked plants).
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_vertical",
+    "layer": "SOLID",
+    "textures": [
+    ],
+    "extra": {
+    }
+  }
+}
+</code>
+
