@@ -193,3 +193,15 @@ the standard one (particularly for stacked plants).
 }
 </code>
 
+# connect_to, ignoreState Support
+The following of these methods supports the "extra" data settings for "connect_to" and "ignoreState", which
+allow for connections to non-identical block states to be considered:
+
+- westeros_ctm
+- westeros_ctm_single
+- westeros_h+v
+- westeros_v+h
+- westeros_ctm+pattern
+- westeros_pillar
+- westeros_vertical
+

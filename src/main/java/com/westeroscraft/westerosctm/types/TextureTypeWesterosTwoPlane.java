@@ -3,6 +3,8 @@ package com.westeroscraft.westerosctm.types;
 import com.westeroscraft.westerosctm.render.TextureWesterosTwoPlane;
 
 import net.minecraft.core.Direction;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import team.chisel.ctm.api.texture.ICTMTexture;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.texture.TextureType;
@@ -12,6 +14,7 @@ import team.chisel.ctm.client.texture.type.TextureTypeCTM;;
 // Vertical+Horizontal or Horizontal+Vertical:  base texture is 1 x 7 tile map, corresponding to 
 // order of images from OptiFine/MCPatch v+h and h+v tile list, respectively.
 //   See https://i.imgur.com/8LZj1Hy.png for layouts
+@OnlyIn(Dist.CLIENT)
 public class TextureTypeWesterosTwoPlane extends TextureTypeCTM {
 	
     @TextureType("westeros_v+h")

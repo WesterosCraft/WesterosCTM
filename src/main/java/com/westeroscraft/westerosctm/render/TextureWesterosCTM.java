@@ -1,9 +1,7 @@
 package com.westeroscraft.westerosctm.render;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
@@ -18,7 +16,6 @@ import team.chisel.ctm.client.texture.render.AbstractTexture;
 import team.chisel.ctm.client.util.BlockstatePredicateParser;
 import team.chisel.ctm.client.util.CTMLogic;
 import team.chisel.ctm.client.util.Dir;
-import team.chisel.ctm.client.util.IdentityStrategy;
 import team.chisel.ctm.client.util.ParseUtils;
 import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
@@ -26,9 +23,6 @@ import team.chisel.ctm.client.util.CTMLogic.StateComparisonCallback;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.types.TextureTypeWesterosCTM;
-
-import it.unimi.dsi.fastutil.objects.Object2ByteMap;
-import it.unimi.dsi.fastutil.objects.Object2ByteOpenCustomHashMap;
 
 public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> {
 

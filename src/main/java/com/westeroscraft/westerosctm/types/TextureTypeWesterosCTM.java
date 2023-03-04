@@ -4,6 +4,8 @@ import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.render.TextureWesterosCTM;
 
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.core.BlockPos;
 import team.chisel.ctm.api.texture.ICTMTexture;
@@ -13,6 +15,7 @@ import team.chisel.ctm.api.texture.TextureType;
 import team.chisel.ctm.api.util.TextureInfo;
 
 // Classic 47 texture CTM - files are base image + 46 additional images, following MCPatcher/Optifile tile order for CTM
+@OnlyIn(Dist.CLIENT)
 @TextureType("westeros_ctm")
 public class TextureTypeWesterosCTM implements ITextureType {
 	@Override

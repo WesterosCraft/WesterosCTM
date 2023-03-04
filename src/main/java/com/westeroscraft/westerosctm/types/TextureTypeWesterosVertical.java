@@ -13,7 +13,10 @@ import team.chisel.ctm.client.texture.ctx.TextureContextPillar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 @TextureType("westeros_vertical")
 public class TextureTypeWesterosVertical implements ITextureType {
 
@@ -24,7 +27,7 @@ public class TextureTypeWesterosVertical implements ITextureType {
     
     @Override
     public TextureContextWesterosPillar getBlockRenderContext(BlockState state, BlockGetter world, BlockPos pos, ICTMTexture<?> tex) {
-        return new TextureContextWesterosPillar(world, pos);
+        return new TextureContextWesterosPillar(world, pos, (TextureWesterosPillar)tex);
     }
     
     @Override
