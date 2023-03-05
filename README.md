@@ -1,11 +1,11 @@
 # WesterosCTM
 
-This is a client mod for Forge 1.16.5 that provides additional CTM types for ConnectedTexturesMod.
+This is a client mod for Forge 1.18.2 that provides additional CTM types for ConnectedTexturesMod.
 
-This mod will not function without ConnectedTexturesMod 1.16.5 installed.
+This mod will not function without ConnectedTexturesMod 1.18.2 installed.
 
 Note: all examples below can be found, along with functional templates and images and examples of all 'stock' ConnectedTexturesMod types,
-at https://github.com/WesterosCraft/WesterosBlocks/tree/1.16.5/src/main/resources/assets/westerosblocks/textures/block/ctm 
+at https://github.com/WesterosCraft/WesterosBlocks/tree/1.18.2/src/main/resources/assets/westerosblocks/textures/block/ctm 
 
 # Additional types
 ## type='westeros_ctm'
