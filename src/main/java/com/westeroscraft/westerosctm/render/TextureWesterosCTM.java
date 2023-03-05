@@ -37,39 +37,6 @@ public class TextureWesterosCTM extends AbstractTexture<TextureTypeWesterosCTM> 
 	@Nullable
 	private final BiPredicate<Direction, BlockState> connectionChecks;
 	
-	private static final class CacheKey {
-		private final BlockState from;
-		private final Direction dir;
-		
-		CacheKey(BlockState f, Direction d) {
-			from = f; dir = d;
-		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + dir.hashCode();
-			result = prime * result + System.identityHashCode(from);
-			return result;
-		}
-
-		@Override
-		public boolean equals(@Nullable Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			CacheKey other = (CacheKey) obj;
-			if (dir != other.dir)
-				return false;
-			if (from != other.from)
-				return false;
-			return true;
-		}
-	}
-
     public TextureWesterosCTM(TextureTypeWesterosCTM type, TextureInfo info) {
         super(type, info);
         this.connectInside = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "connect_inside"));

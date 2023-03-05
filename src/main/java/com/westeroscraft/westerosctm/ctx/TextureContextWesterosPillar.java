@@ -9,7 +9,6 @@ import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
 
 import java.util.Optional;
 
-import com.westeroscraft.westerosctm.render.TextureWesterosCTM;
 import com.westeroscraft.westerosctm.render.TextureWesterosPillar;
 
 import net.minecraft.core.BlockPos;
@@ -32,18 +31,18 @@ public class TextureContextWesterosPillar implements ITextureContext {
     
     
     private long compressedData; // == AXIS_BITS, CONNECT_UP, CONNECT_DOWN
-    private final TextureWesterosPillar tex;
     
-    public TextureContextWesterosPillar(BlockGetter world, BlockPos pos, TextureWesterosPillar tex) {
-    	this.tex = tex;
+    public TextureContextWesterosPillar(BlockGetter world, BlockPos pos, TextureWesterosPillar tex, boolean vertOnly) {
         BlockState state = world.getBlockState(pos);
         int axisValue = AXIS_Y;	// Assume Y
-        Optional<Axis> axis = state.getOptionalValue(RotatedPillarBlock.AXIS);
-        Axis a = Axis.Y;	// Default
-        if (axis.isPresent()) {
-        	a = axis.get();
-        	if (a == Axis.X) axisValue = AXIS_X;
-        	if (a == Axis.Z) axisValue = AXIS_Z;
+        if (!vertOnly) {
+	        Optional<Axis> axis = state.getOptionalValue(RotatedPillarBlock.AXIS);
+	        Axis a = Axis.Y;	// Default
+	        if (axis.isPresent()) {
+	        	a = axis.get();
+	        	if (a == Axis.X) axisValue = AXIS_X;
+	        	if (a == Axis.Z) axisValue = AXIS_Z;
+	        }
         }
         // Get up/down connections, based on orientation
         boolean upConn = false, downConn = false;
@@ -60,7 +59,6 @@ public class TextureContextWesterosPillar implements ITextureContext {
         	downConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);       	        	
         }
         compressedData = (axisValue & AXIS_BITS) | (upConn ? CONNECT_UP : 0) | (downConn ? CONNECT_DOWN : 0);
-        //WesterosCTM.LOGGER.warn(String.format("pos=%1$s, axis=%2$s,upConn=%3$s,downConn=%4$s", pos.toString(), a, upConn, downConn));
     }
 
     public int getAxis() { return (int)(compressedData & AXIS_BITS); }

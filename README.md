@@ -156,8 +156,9 @@ type.
 ## type='westeros_pillar'
 
 This is an alternative to the 'pillar' method that specifically leverages the AXIS property
-to reliably determine the orientation of RotatedPillarBlock subclasses (such as logs and pillars).  If used
+to reliably determine the orientation of RotatedPillarBlock subclasses (such as logs and pillars). If used
 on a block that lacks the AXIS property, the block will be treated as being upright (axis=y), connecting vertically.
+It also expects only the base texture as a 2x2 map, so is more consistent with "ctm_vertical" than "pillar".
 
 <code>
 {
@@ -166,7 +167,6 @@ on a block that lacks the AXIS property, the block will be treated as being upri
     "type": "westeros_pillar",
     "layer": "SOLID",
     "textures": [
-      "westerosblocks:block/ctm/pillar_2x2"
     ],
     "extra": {
     }

@@ -43,7 +43,10 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
     }
     public boolean connectTo(BlockState from, BlockState to, Direction dir) {
         try {
-            return ((connectionChecks == null ? (this.ignoreStates ? (from.getBlock() == to.getBlock()) : (from == to)) : connectionChecks.test(dir, to)) ? 1 : 0) == 1;
+            return (connectionChecks == null) ? 
+            		(this.ignoreStates ? (from.getBlock() == to.getBlock()) :
+        			(from == to)) :
+				connectionChecks.test(dir, to);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -52,10 +55,7 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
     @Override
     public List<BakedQuad> transformQuad(BakedQuad quad, ITextureContext context, int quadGoal) {
         if (context == null) {
-            if (quad.getDirection() != null && quad.getDirection().getAxis().isVertical()) {
-                return Lists.newArrayList(makeQuad(quad, context).transformUVs(sprites[0]).rebake());
-            }
-            return Lists.newArrayList(makeQuad(quad, context).transformUVs(sprites[1], Submap.X2[0][0]).rebake());
+            return Lists.newArrayList(makeQuad(quad, context).transformUVs(sprites[0], Submap.X2[0][0]).rebake());
         }
         return Lists.newArrayList(getQuad(quad, context));
     }
@@ -83,6 +83,6 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
                 uvs = Submap.X2[0][0];	// Neither        		
         	}
         }
-        return q.transformUVs(sprites[1], uvs).rebake();
+        return q.transformUVs(sprites[0], uvs).rebake();
     }
 }
