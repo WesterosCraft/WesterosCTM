@@ -130,7 +130,7 @@ public class TextureWesterosCond extends AbstractTexture<TextureTypeWesterosCond
                         Preconditions.checkArgument(crec.get("rowOut").isJsonPrimitive() && crec.get("rowOut").getAsJsonPrimitive().isNumber(), "rowOut must be a number!");
                 		crule.rowOut = crec.get("rowOut").getAsInt();
                 	}
-                	if (crec.has("yOut")) {
+                	if (crec.has("colOut")) {
                         Preconditions.checkArgument(crec.get("colOut").isJsonPrimitive() && crec.get("colOut").getAsJsonPrimitive().isNumber(), "colOut must be a number!");
                 		crule.colOut = crec.get("colOut").getAsInt();
                 	}	
