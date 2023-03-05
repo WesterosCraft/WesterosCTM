@@ -63,7 +63,7 @@ public class TextureWesterosCond extends AbstractTexture<TextureTypeWesterosCond
     
     private final CondRule[] rules;
     
-    public TextureWesterosCond(TextureTypeWesterosCond type, TextureInfo info) {
+    public TextureWesterosCond(TextureTypeWesterosCond type, TextureInfo info, int condIndex) {
         super(type, info);
         int cWidth = 1;	// Default to 1 x 1
         int cHeight = 1;
@@ -140,7 +140,7 @@ public class TextureWesterosCond extends AbstractTexture<TextureTypeWesterosCond
         // Set dimensions of condition map
         this.condHeight = cHeight;
         this.condWidth = cWidth;
-        this.condIndex = 1;	// Always one for this
+        this.condIndex = condIndex;
         this.rules = crules;
     }
     
@@ -179,16 +179,29 @@ public class TextureWesterosCond extends AbstractTexture<TextureTypeWesterosCond
     public List<BakedQuad> transformQuad(BakedQuad quad, ITextureContext context, int quadGoal) {
         if (context == null) {
             // Default to unmodified base image
-            return Lists.newArrayList(makeQuad(quad, context).transformUVs(sprites[0]).rebake());
+    		return Lists.newArrayList(defaultTexture(quad, context));
         }
         return Lists.newArrayList(getQuad(quad, context));
+    }
+    
+    private BakedQuad defaultTexture(BakedQuad quad, ITextureContext context) {
+    	if (condIndex == 0) {	// If single, row=0, col=0 is the default texture
+            Quad q = makeQuad(quad, context);
+        	float intervalU = 16f / condWidth;
+        	float intervalV = 16f / condHeight;
+        	ISubmap submap = new Submap(intervalU, intervalV, 0, 0);
+            return q.transformUVs(sprites[condIndex], submap).rebake();    		
+    	}
+    	else {
+    		return makeQuad(quad, context).transformUVs(sprites[0]).rebake();
+    	}
     }
 
     private BakedQuad getQuad(BakedQuad in, ITextureContext context) {
         TextureContextWesterosCond ctext = (TextureContextWesterosCond) context;
-        Quad q = makeQuad(in, context);
         // If not remapped, return existing quad unmodified
-        if (!ctext.getIsRemapped()) return q.transformUVs(sprites[0]).rebake();
+        if (!ctext.getIsRemapped()) return defaultTexture(in, context);
+        Quad q = makeQuad(in, context);
     	float intervalU = 16f / condWidth;
     	float intervalV = 16f / condHeight;
     	float minU = intervalU * ctext.getColOut();

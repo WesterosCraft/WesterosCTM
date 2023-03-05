@@ -14,10 +14,10 @@ import team.chisel.ctm.api.texture.ITextureType;
 import team.chisel.ctm.api.texture.TextureType;
 import team.chisel.ctm.api.util.TextureInfo;
 
-// Single texture with conditional substitutions, textures are base text + 
+// Single texture with conditional substitutions, texture is just condWidth x condHeight map, with 0,0 as default image
 @OnlyIn(Dist.CLIENT)
-@TextureType("westeros_cond")
-public class TextureTypeWesterosCond implements ITextureType {
+@TextureType("westeros_single_cond")
+public class TextureTypeWesterosSingleCond extends TextureTypeWesterosCond {
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCond> makeTexture(TextureInfo info) {
       return new TextureWesterosCond(this, info, 1);
@@ -35,7 +35,7 @@ public class TextureTypeWesterosCond implements ITextureType {
 
     @Override
     public int requiredTextures() {
-        return 2;
+        return 1;
     }
 
 	@Override

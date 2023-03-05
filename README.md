@@ -207,6 +207,7 @@ within a provided value range.
     "type": "westeros_cond",
     "layer": "SOLID",
     "textures": [
+       "westerosblocks:block/forest_dirt/dirt0
     ],
     "extra": {
        "condWidth": 1,
@@ -220,6 +221,44 @@ within a provided value range.
             	"minecraft:jungle" ],
             "rowOut": 0,
             "colOut": 0
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
+    }
+  }
+}
+</code>
+
+## type='westeros_single_cond'
+
+This is a simple use of the conditional substitution support, where the substitution image is the base image, and the
+default texture used corresponds to the row=0, col=0 texture from that image.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_single_cond",
+    "layer": "SOLID",
+    "textures": [
+    ],
+    "extra": {
+       "condWidth": 2,
+       "condHeight": 2,
+       "conds": [
+          {
+             "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 1,
+            "colOut": 
           },
           {
             "yPosMin": 200,
@@ -253,7 +292,7 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
 - condWidth: number of textures wide the provided substitution texture image is - if undefined, 1 is assumed
 - condHeight: number of textures high the provided substitution texture image is - if undefined, 1 is assumed
 - conds: An array of substitution rules.  Each rule is an object with the following fields
-   - sources: an optional array of source texture coordinates: each of these objects is formatedd as follows:
+   - sources: an optional array of source texture coordinates: each of these objects is formated as follows:
       - index: index number of the input texture (for simple textures, this is always 0, but it may be non-zero if the base CTM has more than one texture file)
       - row: base zero row in the input texture
       - col: base zero column in the input texture
@@ -273,11 +312,11 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
 On CTMs supporting this feature, the substitution texture image is provided as one additional file added to the 'textures' array
 (that is, one additional texture file, beyond whatever the given CTM would otherwise expect).
 
-For each use of a texture with the conditional substitution configured, the source texture is dermined as usual for the given
+For each use of a texture with the conditional substitution configured, the source texture is determined as usual for the given
 type of CTM (for westeros_cond, this is just the base texture - index=0, row=0, col=0).  Then, the rules are evaluated for the
 block, in order from first to last.  The first matching rule will result in the texture being replaced with the row=rowOut, col=colOut
 texture from the substitution texture image.  If no rule matches, the source texture is uses as normal.
 
-The following CTMs support conditional substitition images:
+The following CTMs support conditional substitution images:
 - westeros_cond
-
+- westeros_single_cond
