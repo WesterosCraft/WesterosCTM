@@ -35,11 +35,20 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
 	@Nullable
 	private final BiPredicate<Direction, BlockState> connectionChecks;
 
-    public TextureWesterosPillar(TextureTypeWesterosPillar type, TextureInfo info) {
+	@Nullable
+	public final WesterosConditionHandler handler;
+	
+    public TextureWesterosPillar(TextureTypeWesterosPillar type, TextureInfo info, boolean cond) {
         super(type, info);
         this.connectInside = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "connect_inside"));
         this.ignoreStates = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
         this.connectionChecks = info.getInfo().map(obj -> predicateParser.parse(obj.get("connect_to"))).orElse(null);
+        if (cond) {
+        	this.handler = new WesterosConditionHandler(info, 1);
+        }
+        else {
+        	this.handler = null;
+        }
     }
     public boolean connectTo(BlockState from, BlockState to, Direction dir) {
         try {
@@ -63,26 +72,27 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
     private BakedQuad getQuad(BakedQuad in, ITextureContext context) {
         Quad q = makeQuad(in, context);
         TextureContextWesterosPillar ctx = (TextureContextWesterosPillar) context;
+        long condDataBits = ctx.getCompressedData() >> ctx.BITS_OFF;
         boolean connUp = ctx.getConnectUp();
         boolean connDown = ctx.getConnectDown();
         // Compute UV for which image to get
-        ISubmap uvs;
+        int row = 0, col = 0;
         if (connUp) {
         	if (connDown) {
-                uvs = Submap.X2[1][0];	// Use both image        		
+        		row = 1; col = 0;
         	}
         	else {
-                uvs = Submap.X2[1][1];  // Bottom image      		
+        		row = 1; col = 1;
         	}
         }
         else {
         	if (connDown) {
-                uvs = Submap.X2[0][1];  // Top image      		
+        		row = 0; col = 1;
         	}
         	else {
-                uvs = Submap.X2[0][0];	// Neither        		
+        		row = 0; col = 0;
         	}
         }
-        return q.transformUVs(sprites[0], uvs).rebake();
+        return q.transformUVs(sprites[0], Submap.X2[row][col]).rebake();
     }
 }

@@ -20,7 +20,7 @@ public class TextureTypeWesterosPillar implements ITextureType {
 
     @Override
     public ICTMTexture<TextureTypeWesterosPillar> makeTexture(TextureInfo info) {
-        return new TextureWesterosPillar(this, info);
+        return new TextureWesterosPillar(this, info, false);
     }
     
     @Override

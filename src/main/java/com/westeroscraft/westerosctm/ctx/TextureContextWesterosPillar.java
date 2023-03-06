@@ -29,8 +29,9 @@ public class TextureContextWesterosPillar implements ITextureContext {
     public static final int CONNECT_UP = 1 << 2;
     public static final int CONNECT_DOWN = 1 << 3;
     
+    public static final int BITS_OFF = 4;	// Bits used by base encoding (tells us where condition bits can go)
     
-    private long compressedData; // == AXIS_BITS, CONNECT_UP, CONNECT_DOWN
+    private long compressedData; // == AXIS_BITS, CONNECT_UP, CONNECT_DOWN (condition bits starting after this)
     
     public TextureContextWesterosPillar(BlockGetter world, BlockPos pos, TextureWesterosPillar tex, boolean vertOnly) {
         BlockState state = world.getBlockState(pos);
