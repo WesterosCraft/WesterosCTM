@@ -10,7 +10,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.core.BlockPos;
 import team.chisel.ctm.api.texture.ICTMTexture;
 import team.chisel.ctm.api.texture.ITextureContext;
-import team.chisel.ctm.api.texture.ITextureType;
 import team.chisel.ctm.api.texture.TextureType;
 import team.chisel.ctm.api.util.TextureInfo;
 
@@ -20,7 +19,7 @@ import team.chisel.ctm.api.util.TextureInfo;
 public class TextureTypeWesterosSingleCond extends TextureTypeWesterosCond {
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCond> makeTexture(TextureInfo info) {
-      return new TextureWesterosCond(this, info, 1);
+      return new TextureWesterosCond(this, info, 0);
     }
 
     @Override
