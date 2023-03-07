@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
-import team.chisel.ctm.api.texture.ISubmap;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.util.TextureInfo;
 import team.chisel.ctm.client.texture.render.AbstractTexture;
@@ -72,26 +71,28 @@ public class TextureWesterosPillar extends AbstractTexture<TextureTypeWesterosPi
     private BakedQuad getQuad(BakedQuad in, ITextureContext context) {
         Quad q = makeQuad(in, context);
         TextureContextWesterosPillar ctx = (TextureContextWesterosPillar) context;
-        long condDataBits = ctx.getCompressedData() >> ctx.BITS_OFF;
         boolean connUp = ctx.getConnectUp();
         boolean connDown = ctx.getConnectDown();
         // Compute UV for which image to get
         int row = 0, col = 0;
-        if (connUp) {
-        	if (connDown) {
-        		row = 1; col = 0;
-        	}
-        	else {
-        		row = 1; col = 1;
-        	}
-        }
-        else {
-        	if (connDown) {
-        		row = 0; col = 1;
-        	}
-        	else {
-        		row = 0; col = 0;
-        	}
+        // No connection for endcaps
+        if (ctx.getAxis() != in.getDirection().getAxis()) {
+	        if (connUp) {
+	        	if (connDown) {
+	        		row = 1; col = 0;
+	        	}
+	        	else {
+	        		row = 1; col = 1;
+	        	}
+	        }
+	        else {
+	        	if (connDown) {
+	        		row = 0; col = 1;
+	        	}
+	        	else {
+	        		row = 0; col = 0;
+	        	}
+	        }
         }
         return q.transformUVs(sprites[0], Submap.X2[row][col]).rebake();
     }

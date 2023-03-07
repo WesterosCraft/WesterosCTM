@@ -33,6 +33,8 @@ public class TextureContextWesterosPillar implements ITextureContext {
     
     private long compressedData; // == AXIS_BITS, CONNECT_UP, CONNECT_DOWN (condition bits starting after this)
     
+    private static final Axis[] axes = { Axis.X, Axis.Y, Axis.Z };
+    
     public TextureContextWesterosPillar(BlockGetter world, BlockPos pos, TextureWesterosPillar tex, boolean vertOnly) {
         BlockState state = world.getBlockState(pos);
         int axisValue = AXIS_Y;	// Assume Y
@@ -62,7 +64,7 @@ public class TextureContextWesterosPillar implements ITextureContext {
         compressedData = (axisValue & AXIS_BITS) | (upConn ? CONNECT_UP : 0) | (downConn ? CONNECT_DOWN : 0);
     }
 
-    public int getAxis() { return (int)(compressedData & AXIS_BITS); }
+    public Axis getAxis() { return axes[(int)(compressedData & AXIS_BITS) - 1]; }
     public boolean getConnectUp() { return ((compressedData & CONNECT_UP) == CONNECT_UP) ? true : false; }
     public boolean getConnectDown() { return ((compressedData & CONNECT_DOWN) == CONNECT_DOWN) ? true : false; }
     

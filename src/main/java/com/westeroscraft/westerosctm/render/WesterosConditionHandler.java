@@ -1,11 +1,6 @@
 package com.westeroscraft.westerosctm.render;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.biome.Biome;
 import team.chisel.ctm.api.util.TextureInfo;
 
 import com.google.common.base.Preconditions;
@@ -14,13 +9,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class WesterosConditionHandler {
-	public static final long COND_REMAPPED_MASK = 0x100L;
-	public static final int COND_REMAPPED_SHIFT = 8;
-	public static final long COND_ROWOUT_MASK = 0x0F0L;
-	public static final int COND_ROWOUT_SHIFT = 4;
-	public static final long COND_COLOUT_MASK = 0x00FL;
-	public static final int COND_COLOUT_SHIFT = 0;
-
     public final int condWidth;
     public final int condHeight;
     public final int condIndex;
@@ -142,37 +130,19 @@ public class WesterosConditionHandler {
     
     // Resolve condition
     // @param txtIdx - index of source texture (0=base texture, etc)
-    // @param txtX - horizontal offset of match in source texture (e.g. 0-11 for CTM, etc)
-    // @param txtY - vertical offset of match in source texture (e.g. 0-3 for CTM, etc)
+    // @param txtRow - vertical offset of match in source texture (e.g. 0-3 for CTM, etc)
+    // @param txtCol - horizontal offset of match in source texture (e.g. 0-11 for CTM, etc)
     // @param world - world for test
     // @param pos - position in world
-    public long resolveCond(int txtIdx, int txtX, int txtY, BlockGetter world, BlockPos pos) {
-    	String biomeName = "";
-    	// Compute biome
-    	LocalPlayer p = Minecraft.getInstance().player;
-    	if (p != null) {
-    		Holder<Biome> b = p.clientLevel.getBiome(pos);
-    		biomeName = b.unwrap().map((v) -> {
-    	         return v.location().toString();
-    	      }, (v) -> {
-    	         return "[unregistered " + v + "]";
-    	      });
-    	}    	
+    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex) {
     	// Find matching rule, if any
     	for (int i = 0; i < rules.length; i++) {
-    		if (rules[i].isMatch(txtIdx, txtX, txtY, biomeName, pos)) {
+    		if (rules[i].isMatch(txtIdx, txtRow, txtRow, biomeName, pos)) {
     			// Return index for corresponding texture
-    			return (1 << COND_REMAPPED_SHIFT) | 
-    				(rules[i].rowOut << COND_ROWOUT_SHIFT) |
-    				(rules[i].colOut << COND_COLOUT_SHIFT);
+    			return tex.getCompactedIndexFromTextureRowColumn(condIndex, rules[i].rowOut, rules[i].colOut);
     		}
     	}
 		// Return index for existing texture
-    	return 0;
+    	return tex.getCompactedIndexFromTextureRowColumn(txtIdx, txtRow, txtCol);
     }
-    
-    public final boolean getIsRemapped(long compressedData) { return (compressedData & COND_REMAPPED_MASK) != 0; }
-    public final int getColOut(long compressedData) { return (int)((compressedData & COND_ROWOUT_MASK) >> COND_ROWOUT_SHIFT); }
-    public final int getRowOut(long compressedData) { return (int)((compressedData & COND_COLOUT_MASK) >> COND_COLOUT_SHIFT); }
-
 }

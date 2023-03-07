@@ -1,7 +1,7 @@
 package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCond;
-import com.westeroscraft.westerosctm.render.TextureWesterosCond;
+import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,15 +18,17 @@ import team.chisel.ctm.api.util.TextureInfo;
 @OnlyIn(Dist.CLIENT)
 @TextureType("westeros_cond")
 public class TextureTypeWesterosCond implements ITextureType {
+	private static final int compactedDims[] = { TextureWesterosCommon.makeDim(1, 1, 0) };
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCond> makeTexture(TextureInfo info) {
-      return new TextureWesterosCond(this, info, 1);
+      //return new TextureWesterosCond(this, info, 1);
+		return new TextureWesterosCommon<TextureTypeWesterosCond>(this, info, compactedDims, true);
     }
 
     @Override
     public ITextureContext getBlockRenderContext(BlockState state, BlockGetter world, BlockPos pos, ICTMTexture<?> tex) {
-        return new TextureContextWesterosCond(world, pos, (TextureWesterosCond) tex);
-     }
+        return new TextureContextWesterosCond(world, pos, (TextureWesterosCommon) tex);
+    }
 
     @Override
     public int getQuadsPerSide() {
