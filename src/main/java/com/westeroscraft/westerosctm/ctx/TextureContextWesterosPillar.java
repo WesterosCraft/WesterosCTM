@@ -30,7 +30,6 @@ public class TextureContextWesterosPillar extends TextureContextCommon {
 	        	axisVal = axis.get();
 	        }
         }
-    	String biomeName = getBiomeName(pos);
         // Get up/down connections, based on orientation
         boolean upConn = false, downConn = false;
         if (axisVal == Axis.Y) {
@@ -64,8 +63,16 @@ public class TextureContextWesterosPillar extends TextureContextCommon {
         	}
         }    	
         // Get index to be used for end caps (0, 0)
-    	int compactedIndexEnd = tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex);
-    	int compactedIndexSide = tex.handler.resolveCond(0, row, col, pos, biomeName, tex);
+    	int compactedIndexEnd, compactedIndexSide;
+    	if (tex.handler != null) {
+        	String biomeName = getBiomeName(pos);
+    		compactedIndexEnd = tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex);
+    		compactedIndexSide = tex.handler.resolveCond(0, row, col, pos, biomeName, tex);
+    	}
+    	else {
+    		compactedIndexEnd = tex.getCompactedIndexFromTextureRowColumn(0, 0, 0);
+    		compactedIndexSide = tex.getCompactedIndexFromTextureRowColumn(0, row, col);
+    	}
     	for (Direction dir : Direction.values()) {
             if (axisVal != dir.getAxis()) {
         		this.setCompactedIndexByDirection(dir, compactedIndexSide);

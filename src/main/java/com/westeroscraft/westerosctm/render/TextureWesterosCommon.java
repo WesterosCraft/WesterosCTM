@@ -93,28 +93,23 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
     }
     
     private BakedQuad defaultTexture(BakedQuad quad, ITextureContext context) {
-    	if (handler.condIndex == 0) {	// If single, row=0, col=0 is the default texture
-            Quad q = makeQuad(quad, context);
-        	float intervalU = 16f / handler.condWidth;
-        	float intervalV = 16f / handler.condHeight;
-        	ISubmap submap = new Submap(intervalU, intervalV, 0, 0);
-            return q.transformUVs(sprites[handler.condIndex], submap).rebake();    		
-    	}
-    	else {
-    		return makeQuad(quad, context).transformUVs(sprites[0]).rebake();
-    	}
+        Quad q = makeQuad(quad, context);
+    	float intervalU = 16f / getWidth(compactedDims[0]);
+    	float intervalV = 16f / getHeight(compactedDims[0]);
+    	ISubmap submap = new Submap(intervalU, intervalV, 0, 0);
+        return q.transformUVs(sprites[0], submap).rebake();    		
     }
 
     private BakedQuad getQuad(BakedQuad in, ITextureContext context) {
         TextureContextCommon ctext = (TextureContextCommon) context;
         int compactedIndex = ctext.getCompactedIndexByDirection(in.getDirection());
-        WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
+        //WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
         int txtIdx = this.getTextureIndexFromCompacted(compactedIndex);	// Get texture index
         int row = this.getRowFromCompactedIndex(compactedIndex, txtIdx);
         int col = this.getColumnFromCompactedIndex(compactedIndex, txtIdx);
         int width = getWidth(compactedDims[txtIdx]);
         int height = getHeight(compactedDims[txtIdx]);
-        WesterosCTM.LOGGER.info(String.format("row=%d,col=%d,width=%d,height=%d,txtIdx=%d", row, col, width, height, txtIdx));        
+        //WesterosCTM.LOGGER.info(String.format("row=%d,col=%d,width=%d,height=%d,txtIdx=%d", row, col, width, height, txtIdx));        
         Quad q = makeQuad(in, context);
     	float intervalU = 16f / width;
     	float intervalV = 16f / height;
