@@ -14,16 +14,19 @@ public class WesterosConditionHandler {
     public final int condIndex;
     
     private static class SrcTexture {
-    	int index;
-    	int row;
-    	int col;
+    	int index = MATCH_ANY;
+    	int row = MATCH_ANY;
+    	int col = MATCH_ANY;
     };
+    private static final int MATCH_ANY = -1;
+    private static final int OUT_EQ_SRC = -1;
+    
     private static class CondRule {
     	SrcTexture[] source = null;	// If defined, only apply rule to source textures with given texture index, column, row
     	String[] biomeNames = null;	// If defined, only apply rule to locations matching one of the biomes
     	int yPosMin = Integer.MIN_VALUE;	// If defined, only apply rule if pos.getY() >= yPosMin
     	int yPosMax = Integer.MAX_VALUE;	// If defined, pnly apply rule if pos.getY() <= yPosMax
-    	int rowOut = 0, colOut = 0;		// column, row for texture to be substituted
+    	int rowOut = OUT_EQ_SRC, colOut = OUT_EQ_SRC;		// column, row for texture to be substituted
     	
     	boolean isMatch(int txtIdx, int txtRow, int txtCol, String biomename, BlockPos pos) {
     		int y = pos.getY();
@@ -31,7 +34,10 @@ public class WesterosConditionHandler {
     		if (source != null) {
     			boolean match = false;
     			for (int i = 0; (i < source.length) && (!match); i++) {
-    				match = (source[i].index == txtIdx) && (source[i].row == txtRow) && (source[i].col == txtCol);
+    				// Match if equal or rule didn't specify value
+    				match = ((source[i].index == txtIdx) || (source[i].index == MATCH_ANY)) && 
+    						((source[i].row == txtRow) || (source[i].row == MATCH_ANY)) && 
+    						((source[i].col == txtCol) || (source[i].col == MATCH_ANY));
     			}
     			if (!match) return false;
     		}
@@ -79,13 +85,19 @@ public class WesterosConditionHandler {
                         int i = 0;
                         for (JsonElement srec : srclist) {
                         	JsonObject srcrec = srec.getAsJsonObject();
-                            Preconditions.checkArgument(srcrec.get("index").isJsonPrimitive() && srcrec.get("index").getAsJsonPrimitive().isNumber(), "index must be a number!");
-                            Preconditions.checkArgument(srcrec.get("row").isJsonPrimitive() && srcrec.get("row").getAsJsonPrimitive().isNumber(), "row must be a number!");
-                            Preconditions.checkArgument(srcrec.get("col").isJsonPrimitive() && srcrec.get("col").getAsJsonPrimitive().isNumber(), "col must be a number!");
                         	SrcTexture stxt = new SrcTexture();
-                        	stxt.index = srcrec.get("index").getAsInt();
-                        	stxt.row = srcrec.get("row").getAsInt();
-                        	stxt.col = srcrec.get("col").getAsInt();
+                        	if (srcrec.has("index")) {
+                        		Preconditions.checkArgument(srcrec.get("index").isJsonPrimitive() && srcrec.get("index").getAsJsonPrimitive().isNumber(), "index must be a number!");
+                            	stxt.index = srcrec.get("index").getAsInt();
+                        	}
+                        	if (srcrec.has("row")) {
+                        		Preconditions.checkArgument(srcrec.get("row").isJsonPrimitive() && srcrec.get("row").getAsJsonPrimitive().isNumber(), "row must be a number!");
+                            	stxt.row = srcrec.get("row").getAsInt();
+                        	}
+                        	if (srcrec.has("col")) {
+                        		Preconditions.checkArgument(srcrec.get("col").isJsonPrimitive() && srcrec.get("col").getAsJsonPrimitive().isNumber(), "col must be a number!");
+                        		stxt.col = srcrec.get("col").getAsInt();
+                        	}
                         	crule.source[i] = stxt;
                         	i++;
                         }
@@ -138,8 +150,13 @@ public class WesterosConditionHandler {
     	// Find matching rule, if any
     	for (int i = 0; i < rules.length; i++) {
     		if (rules[i].isMatch(txtIdx, txtRow, txtRow, biomeName, pos)) {
+    			int rowOut = rules[i].rowOut;
+    			int colOut = rules[i].colOut;
+    			// If equivalence map, copy row/col indexes
+    			if (rowOut == OUT_EQ_SRC) rowOut = txtRow;
+    			if (colOut == OUT_EQ_SRC) colOut = txtCol;
     			// Return index for corresponding texture
-    			return tex.getCompactedIndexFromTextureRowColumn(condIndex, rules[i].rowOut, rules[i].colOut);
+    			return tex.getCompactedIndexFromTextureRowColumn(condIndex, rowOut, colOut);
     		}
     	}
 		// Return index for existing texture

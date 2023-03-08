@@ -214,7 +214,7 @@ within a provided value range.
        "condHeight": 2,
        "conds": [
           {
-             "biomeNames": [  
+            "biomeNames": [  
                 "minecraft:forest",
      	        "minecraft:flower_forest",
         	    "minecraft:dark_forest",
@@ -252,13 +252,92 @@ default texture used corresponds to the row=0, col=0 texture from that image.
        "condHeight": 2,
        "conds": [
           {
-             "biomeNames": [  
+            "biomeNames": [  
                 "minecraft:forest",
      	        "minecraft:flower_forest",
         	    "minecraft:dark_forest",
             	"minecraft:jungle" ],
             "rowOut": 1,
             "colOut": 
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
+    }
+  }
+}
+</code>
+
+
+## type='westeros_pillar_cond'
+
+This adds the 'westeros_cond' features to the 'westeros_pillar' function.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_pillar_cond",
+    "layer": "SOLID",
+    "textures": [
+       "westerosblocks:block/forest_dirt/dirt0
+    ],
+    "extra": {
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "sources": [ { "index": 0, "row": 1, "col": 0 } ],
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
+          },
+          {
+            "sources": [ { "index": 0, "row": 1, "col": 0 } ],
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
+    }
+  }
+}
+</code>
+
+## type='westeros_vertical_cond'
+
+This adds the 'westeros_cond' features to the 'westeros_vertical' function.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_vertical",
+    "layer": "SOLID",
+    "textures": [
+       "westerosblocks:block/forest_dirt/dirt0
+    ],
+    "extra": {
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
           },
           {
             "yPosMin": 200,
@@ -283,6 +362,8 @@ allow for connections to non-identical block states to be considered:
 - westeros_ctm+pattern
 - westeros_pillar
 - westeros_vertical
+- westeros_pillar_cond
+- westeros_vertical_cond
 
 # Conditional override support
 This is a new feature to enable substitution of textures with alternate textures, based on matching provided
@@ -293,9 +374,9 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
 - condHeight: number of textures high the provided substitution texture image is - if undefined, 1 is assumed
 - conds: An array of substitution rules.  Each rule is an object with the following fields
    - sources: an optional array of source texture coordinates: each of these objects is formated as follows:
-      - index: index number of the input texture (for simple textures, this is always 0, but it may be non-zero if the base CTM has more than one texture file)
-      - row: base zero row in the input texture
-      - col: base zero column in the input texture
+      - index: index number of the input texture - if not defined, any index will match
+      - row: base zero row in the input texture - if not defined, any row will match
+      - col: base zero column in the input texture - if not defined, any column will match
      If sources is not defined, the rule may match any source texture coordinate.  If provided, the rule only applies
      if the source texture is matches the provided coordinate.  For a westeros_cond, the single source texture would be
      { "index": 0, "row": 0, "col" 0 }, although no sources condition is needed for this case.
@@ -306,9 +387,9 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
    - yPosMax: if specified, maximum Y coordinate for a block in order for the rule to match (Yblock <= yPosMax).  If not specified,
      no upper bound is assumed.
    - rowOut: optional parameter indicating the 0-based row number in the provided substitution texture image to be used when
-     the rule matches.  If not provided, 0 is assumed.
+     the rule matches.  If not provided, the row of the source image is used (row N in the source maps to row N in the substitution texture).
    - colOut: optional parameter indicating the 0-based column number in the provided substitution texture image to be used when
-     the rule matches.  If not provided, 0 is assumed.
+     the rule matches.  If not provided, the column of the source image is used (column N in the source maps to column N in the substitution texture).
 On CTMs supporting this feature, the substitution texture image is provided as one additional file added to the 'textures' array
 (that is, one additional texture file, beyond whatever the given CTM would otherwise expect).
 
