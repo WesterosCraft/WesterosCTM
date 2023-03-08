@@ -15,13 +15,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-@TextureType("westeros_pillar")
-public class TextureTypeWesterosPillar implements ITextureType {
+@TextureType("westeros_pillar_cond")
+public class TextureTypeWesterosPillarCond implements ITextureType {
 	private static final int compactedDims[] = { TextureWesterosCommon.makeDim(2, 2, 0) };
     @Override
-    public ICTMTexture<TextureTypeWesterosPillar> makeTexture(TextureInfo info) {
+    public ICTMTexture<TextureTypeWesterosPillarCond> makeTexture(TextureInfo info) {
         //return new TextureWesterosPillar(this, info, false);
-		return new TextureWesterosCommon<TextureTypeWesterosPillar>(this, info, compactedDims, false);
+		return new TextureWesterosCommon<TextureTypeWesterosPillarCond>(this, info, compactedDims, true);
     }
     
     @Override
@@ -31,7 +31,7 @@ public class TextureTypeWesterosPillar implements ITextureType {
     
     @Override
     public int requiredTextures() {
-        return 1;
+        return 2;
     }
 
     @Override

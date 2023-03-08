@@ -9,7 +9,7 @@ import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
 
 import java.util.Optional;
 
-import com.westeroscraft.westerosctm.render.TextureWesterosPillar;
+import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,42 +18,26 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-import team.chisel.ctm.api.texture.ITextureContext;
-
-public class TextureContextWesterosPillar implements ITextureContext {
-    public static final int AXIS_X = 1;
-    public static final int AXIS_Y = 2;
-    public static final int AXIS_Z = 3;
-    public static final int AXIS_BITS = 0x3;
-    
-    public static final int CONNECT_UP = 1 << 2;
-    public static final int CONNECT_DOWN = 1 << 3;
-    
-    public static final int BITS_OFF = 4;	// Bits used by base encoding (tells us where condition bits can go)
-    
-    private long compressedData; // == AXIS_BITS, CONNECT_UP, CONNECT_DOWN (condition bits starting after this)
-    
-    private static final Axis[] axes = { Axis.X, Axis.Y, Axis.Z };
-    
-    public TextureContextWesterosPillar(BlockGetter world, BlockPos pos, TextureWesterosPillar tex, boolean vertOnly) {
+public class TextureContextWesterosPillar extends TextureContextCommon {
+	
+    public TextureContextWesterosPillar(BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex,
+		boolean vertOnly) {
         BlockState state = world.getBlockState(pos);
-        int axisValue = AXIS_Y;	// Assume Y
+        Axis axisVal = Axis.Y;
         if (!vertOnly) {
 	        Optional<Axis> axis = state.getOptionalValue(RotatedPillarBlock.AXIS);
-	        Axis a = Axis.Y;	// Default
 	        if (axis.isPresent()) {
-	        	a = axis.get();
-	        	if (a == Axis.X) axisValue = AXIS_X;
-	        	if (a == Axis.Z) axisValue = AXIS_Z;
+	        	axisVal = axis.get();
 	        }
         }
+    	String biomeName = getBiomeName(pos);
         // Get up/down connections, based on orientation
         boolean upConn = false, downConn = false;
-        if (axisValue == AXIS_Y) {
+        if (axisVal == Axis.Y) {
         	upConn = tex.connectTo(state, world.getBlockState(UP.transform(pos)), Direction.UP);
         	downConn = tex.connectTo(state, world.getBlockState(DOWN.transform(pos)), Direction.DOWN);
         }
-        else if (axisValue == AXIS_X) {
+        else if (axisVal == Axis.X) {
         	upConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
         	downConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
         }
@@ -61,15 +45,34 @@ public class TextureContextWesterosPillar implements ITextureContext {
         	upConn = tex.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
         	downConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);       	        	
         }
-        compressedData = (axisValue & AXIS_BITS) | (upConn ? CONNECT_UP : 0) | (downConn ? CONNECT_DOWN : 0);
-    }
-
-    public Axis getAxis() { return axes[(int)(compressedData & AXIS_BITS) - 1]; }
-    public boolean getConnectUp() { return ((compressedData & CONNECT_UP) == CONNECT_UP) ? true : false; }
-    public boolean getConnectDown() { return ((compressedData & CONNECT_DOWN) == CONNECT_DOWN) ? true : false; }
-    
-    @Override
-    public long getCompressedData(){
-        return this.compressedData;
-    }
+        // Compute patch for sides
+        int row = 0, col = 0;
+        if (upConn) {
+        	if (downConn) {
+        		row = 1; col = 0;
+        	}
+        	else {
+        		row = 1; col = 1;
+        	}
+        }
+        else {
+        	if (downConn) {
+        		row = 0; col = 1;
+        	}
+        	else {
+        		row = 0; col = 0;
+        	}
+        }    	
+        // Get index to be used for end caps (0, 0)
+    	int compactedIndexEnd = tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex);
+    	int compactedIndexSide = tex.handler.resolveCond(0, row, col, pos, biomeName, tex);
+    	for (Direction dir : Direction.values()) {
+            if (axisVal != dir.getAxis()) {
+        		this.setCompactedIndexByDirection(dir, compactedIndexSide);
+            }
+            else {
+        		this.setCompactedIndexByDirection(dir, compactedIndexEnd);
+            }
+    	}
+    }    
 }

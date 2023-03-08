@@ -12,8 +12,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-@TextureType("westeros_vertical")
-public class TextureTypeWesterosVertical extends TextureTypeWesterosPillar {
+@TextureType("westeros_vertical_cond")
+public class TextureTypeWesterosVerticalCond extends TextureTypeWesterosPillarCond {
     @Override
     public TextureContextWesterosPillar getBlockRenderContext(BlockState state, BlockGetter world, BlockPos pos, ICTMTexture<?> tex) {
         return new TextureContextWesterosPillar(world, pos, (TextureWesterosCommon<?>) tex, true);
