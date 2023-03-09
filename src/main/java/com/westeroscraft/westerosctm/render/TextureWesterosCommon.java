@@ -21,7 +21,6 @@ import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
 
 import com.google.common.collect.Lists;
-import com.westeroscraft.westerosctm.WesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextCommon;
 
 public class TextureWesterosCommon<T extends ITextureType> extends AbstractTexture<T>

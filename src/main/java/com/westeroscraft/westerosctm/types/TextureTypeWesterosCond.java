@@ -27,7 +27,7 @@ public class TextureTypeWesterosCond implements ITextureType {
 
     @Override
     public ITextureContext getBlockRenderContext(BlockState state, BlockGetter world, BlockPos pos, ICTMTexture<?> tex) {
-        return new TextureContextWesterosCond(world, pos, (TextureWesterosCommon) tex);
+        return new TextureContextWesterosCond(world, pos, (TextureWesterosCommon<?>) tex);
     }
 
     @Override

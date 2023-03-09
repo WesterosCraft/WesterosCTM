@@ -32,7 +32,8 @@ public abstract class TextureContextCommon implements ITextureContext {
     public String getBiomeName(BlockPos pos) {
     	String biomeName = "";
     	// Compute biome
-    	LocalPlayer p = Minecraft.getInstance().player;
+    	@SuppressWarnings("resource")
+		LocalPlayer p = Minecraft.getInstance().player;
     	if (p != null) {
     		Holder<Biome> b = p.clientLevel.getBiome(pos);
     		biomeName = b.unwrap().map((v) -> {
