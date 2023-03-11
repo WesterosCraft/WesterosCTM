@@ -37,12 +37,12 @@ public class TextureContextWesterosPattern extends TextureContextCommon {
         int twidth = TextureWesterosCommon.getWidth(tex.compactedDims[0]);
         int theight = TextureWesterosCommon.getHeight(tex.compactedDims[0]);
         // UP
-        trow = getPatternIndex(z+1, theight);
+        trow = getPatternIndex(z, theight);
         tcol = getPatternIndex(x, twidth);
         cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
         this.setCompactedIndexByDirection(Direction.UP, cidx);
         // DOWN
-        trow = getPatternIndex(-z+1, theight);
+        trow = getPatternIndex(-z, theight);
         tcol = getPatternIndex(x, twidth);
         cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
         this.setCompactedIndexByDirection(Direction.DOWN, cidx);
@@ -58,12 +58,12 @@ public class TextureContextWesterosPattern extends TextureContextCommon {
         this.setCompactedIndexByDirection(Direction.SOUTH, cidx);
         // WEST
         trow = getPatternIndex(-y, theight);
-        tcol = getPatternIndex(z+1, twidth);
+        tcol = getPatternIndex(z, twidth);
         cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
         this.setCompactedIndexByDirection(Direction.WEST, cidx);
         // EAST
         trow = getPatternIndex(-y, theight);
-        tcol = getPatternIndex(-z+1, twidth);
+        tcol = getPatternIndex(-z, twidth);
         cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
         this.setCompactedIndexByDirection(Direction.EAST, cidx);
     }    
