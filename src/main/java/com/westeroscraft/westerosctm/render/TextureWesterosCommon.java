@@ -26,7 +26,7 @@ import com.westeroscraft.westerosctm.ctx.TextureContextCommon;
 public class TextureWesterosCommon<T extends ITextureType> extends AbstractTexture<T>
 	implements ITextureWesterosCompactedIndex {    
     public final WesterosConditionHandler handler;
-    public final int compactedDims[];	// (width << 24) | (height << 16) | lastoffset
+    public int compactedDims[];	// (width << 24) | (height << 16) | lastoffset
     
     private static final int COMPACT_LASTOFF_MASK = 0xFFFF;
     private static final int COMPACT_WIDTH_MASK = 0xFF000000;
@@ -59,16 +59,24 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
         this.connectionChecks = info.getInfo().map(obj -> predicateParser.parse(obj.get("connect_to"))).orElse(null);
 
         if (conds) {
+        	this.handler = new WesterosConditionHandler(info, compactedDims.length);
+        }
+        else {
+        	this.handler = null;
+        }
+        computeCompactedDims(compactedDims, conds);
+    }
+    
+    protected void computeCompactedDims(final int[] compactedDims, boolean conds) {
+        if (conds) {
         	int prevTxtCount = compactedDims.length;
-        	this.handler = new WesterosConditionHandler(info, prevTxtCount);
         	this.compactedDims = Arrays.copyOf(compactedDims, prevTxtCount + 1);
         	int lastend = (prevTxtCount == 0) ? 0 : getLastOffset(compactedDims[prevTxtCount-1]);
         	this.compactedDims[prevTxtCount] = makeDim(handler.condWidth, handler.condHeight, lastend);
         }
         else {
-        	this.handler = null;
         	this.compactedDims = compactedDims;
-        }
+        }    	
     }
     
     public boolean connectTo(BlockState from, BlockState to, Direction dir) {
