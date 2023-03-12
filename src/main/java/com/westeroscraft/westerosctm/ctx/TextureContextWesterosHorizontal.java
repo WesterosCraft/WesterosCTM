@@ -39,28 +39,30 @@ public class TextureContextWesterosHorizontal extends TextureContextCommon {
         	hasHandler = true;
     	}
     	// Set top and bottom
-    	int idx = hasHandler ? tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex) : 
+    	int idx = hasHandler ? tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex, Direction.UP) : 
     		tex.getCompactedIndexFromTextureRowColumn(0, 0, 0);
     	this.setCompactedIndexByDirection(Direction.UP, idx);
+    	idx = hasHandler ? tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex, Direction.DOWN) : 
+    		tex.getCompactedIndexFromTextureRowColumn(0, 0, 0);
     	this.setCompactedIndexByDirection(Direction.DOWN, idx);
         // Compute patch for NORTH (east=left, west=right)
     	int row = getRowByConnection(eastConn, westConn), col = getColByConnection(eastConn, westConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex) : 
+    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.NORTH) : 
     		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
     	this.setCompactedIndexByDirection(Direction.NORTH, idx);
         // Compute patch for SOUTH (west=left, east=right)
     	row = getRowByConnection(westConn, eastConn); col = getColByConnection(westConn, eastConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex) : 
+    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.SOUTH) : 
     		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
     	this.setCompactedIndexByDirection(Direction.SOUTH, idx);
         // Compute patch for EAST (south=left, north=right)
     	row = getRowByConnection(southConn, northConn); col = getColByConnection(southConn, northConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex) : 
+    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.EAST) : 
     		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
     	this.setCompactedIndexByDirection(Direction.EAST, idx);
         // Compute patch for WEST (north=left, south=right)
     	row = getRowByConnection(northConn, southConn); col = getColByConnection(northConn, southConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex) : 
+    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.WEST) : 
     		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
     	this.setCompactedIndexByDirection(Direction.WEST, idx);
     }    

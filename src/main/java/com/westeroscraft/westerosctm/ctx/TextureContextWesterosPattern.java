@@ -5,6 +5,7 @@ import com.westeroscraft.westerosctm.render.TextureWesterosPattern;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.BlockGetter;
 
 public class TextureContextWesterosPattern extends TextureContextCommon {
@@ -12,59 +13,57 @@ public class TextureContextWesterosPattern extends TextureContextCommon {
 	private static final int getPatternIndex(int coord, int dim) {
 		return ((coord % dim) + dim) % dim;
 	}
-	
-	private int getTextureIndex(int trow, int tcol, TextureWesterosPattern<?> tex, BlockPos pos, String biomeName) {
-		if (tex.handler != null) {
-			return tex.handler.resolveCond(0, trow, tcol, pos, biomeName, tex);
+	public static final int getPatternRow(int x, int y, int z, Direction dir, int theight) {
+		switch (dir) {
+			case DOWN:
+				 return getPatternIndex(-z, theight);
+			case UP:
+		        return getPatternIndex(z, theight);
+			case NORTH:
+				return getPatternIndex(-y, theight);
+			case SOUTH:
+				return getPatternIndex(-y, theight);
+			case WEST:
+				return getPatternIndex(-y, theight);
+			case EAST:
+				return getPatternIndex(-y, theight);
 		}
-		else {
-			return tex.getCompactedIndexFromTextureRowColumn(0, trow, tcol);
+		return 0;
+	}
+	public static final int getPatternCol(int x, int y, int z, Direction dir, int twidth) {
+		switch (dir) {
+			case DOWN:
+				 return getPatternIndex(x, twidth);
+			case UP:
+		        return getPatternIndex(x, twidth);
+			case NORTH:
+				return getPatternIndex(-x, twidth);
+			case SOUTH:
+				return getPatternIndex(x, twidth);
+			case WEST:
+				return getPatternIndex(z, twidth);
+			case EAST:
+				return getPatternIndex(-z, twidth);
 		}
+		return 0;
 	}
 	
     public TextureContextWesterosPattern(BlockGetter world, BlockPos pos, TextureWesterosPattern<?> tex) {
-        int tcol, trow, cidx;
-        String biomeName = null;
-
         int x = pos.getX();
         int y = pos.getY();
         int z = pos.getZ();
         // Get biome name, if needed
+        String biomeName = null;
     	if (tex.handler != null) {
 			biomeName = getBiomeName(pos);
     	}
         // Pattern dimensions
         int twidth = TextureWesterosCommon.getWidth(tex.compactedDims[0]);
         int theight = TextureWesterosCommon.getHeight(tex.compactedDims[0]);
-        // UP
-        trow = getPatternIndex(z, theight);
-        tcol = getPatternIndex(x, twidth);
-        cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
-        this.setCompactedIndexByDirection(Direction.UP, cidx);
-        // DOWN
-        trow = getPatternIndex(-z, theight);
-        tcol = getPatternIndex(x, twidth);
-        cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
-        this.setCompactedIndexByDirection(Direction.DOWN, cidx);
-        // NORTH
-        trow = getPatternIndex(-y, theight);
-        tcol = getPatternIndex(-x, twidth);
-        cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
-        this.setCompactedIndexByDirection(Direction.NORTH, cidx);
-        // SOUTH
-        trow = getPatternIndex(-y, theight);
-        tcol = getPatternIndex(x, twidth);
-        cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
-        this.setCompactedIndexByDirection(Direction.SOUTH, cidx);
-        // WEST
-        trow = getPatternIndex(-y, theight);
-        tcol = getPatternIndex(z, twidth);
-        cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
-        this.setCompactedIndexByDirection(Direction.WEST, cidx);
-        // EAST
-        trow = getPatternIndex(-y, theight);
-        tcol = getPatternIndex(-z, twidth);
-        cidx = getTextureIndex(trow, tcol, tex, pos, biomeName);
-        this.setCompactedIndexByDirection(Direction.EAST, cidx);
+        for (Direction dir : Direction.values()) {
+        	int cidx = getTextureIndex(0, getPatternRow(x, y, z, dir, theight),
+    			getPatternCol(x, y, z, dir, twidth), tex, pos, biomeName, dir);
+            this.setCompactedIndexByDirection(dir, cidx);
+        }
     }    
 }

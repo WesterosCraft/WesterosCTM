@@ -1,5 +1,7 @@
 package com.westeroscraft.westerosctm.ctx;
 
+import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -44,6 +46,16 @@ public abstract class TextureContextCommon implements ITextureContext {
     	}    	
     	return biomeName;
     }
+    
+	protected int getTextureIndex(int tidx, int trow, int tcol, TextureWesterosCommon<?> tex, BlockPos pos, String biomeName, Direction dir) {
+		if (tex.handler != null) {
+			return tex.handler.resolveCond(tidx, trow, tcol, pos, biomeName, tex, dir);
+		}
+		else {
+			return tex.getCompactedIndexFromTextureRowColumn(tidx, trow, tcol);
+		}
+	}
+
     @Override
     public long getCompressedData() {
         return this.compressedData;

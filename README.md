@@ -351,6 +351,65 @@ This adds the 'westeros_cond' features to the 'westeros_vertical' function.
 }
 </code>
 
+## type='westeros_pattern'
+
+This is an alternative to the 'pattern' method.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "pattern",
+    "layer": "SOLID",
+    "textures": [
+    ],
+    "extra": {
+       "width": 3,
+       "height": 3
+    }
+  }
+}
+</code>
+
+## type='westeros_pattern_cond'
+
+This adds the 'westeros_cond' features to the 'westeros_pattern' function.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_pattern_cond",
+    "layer": "SOLID",
+    "textures": [
+    ],
+    "extra": {
+       "width": 3,
+       "height": 3,
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
+    }
+  }
+}
+</code>
+
 # connect_to, ignoreState Support
 The following of these methods supports the "extra" data settings for "connect_to" and "ignoreState", which
 allow for connections to non-identical block states to be considered:
@@ -390,6 +449,9 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
      the rule matches.  If not provided, the row of the source image is used (row N in the source maps to row N in the substitution texture).
    - colOut: optional parameter indicating the 0-based column number in the provided substitution texture image to be used when
      the rule matches.  If not provided, the column of the source image is used (column N in the source maps to column N in the substitution texture).
+   - patternWidth, patternHeight: option parameter that indicates that the outpot should be produced by looking up the texture based on the block
+     position relative to a 'pattern' array in the conditional texture image - the pattern is at 'rowOut, colOut' to 
+	 'rowOut+patternHeight-1, colOut+patternWidth-1', and is used to select the replacement image.
 On CTMs supporting this feature, the substitution texture image is provided as one additional file added to the 'textures' array
 (that is, one additional texture file, beyond whatever the given CTM would otherwise expect).
 
@@ -401,3 +463,7 @@ texture from the substitution texture image.  If no rule matches, the source tex
 The following CTMs support conditional substitution images:
 - westeros_cond
 - westeros_single_cond
+- westeros_vertical_cond
+- westeros_pillar_cond
+- westeros_pattern_cond
+

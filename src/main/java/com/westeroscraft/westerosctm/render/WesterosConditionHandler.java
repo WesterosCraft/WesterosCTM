@@ -1,12 +1,14 @@
 package com.westeroscraft.westerosctm.render;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import team.chisel.ctm.api.util.TextureInfo;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPattern;
 
 public class WesterosConditionHandler {
     public final int condWidth;
@@ -26,7 +28,8 @@ public class WesterosConditionHandler {
     	String[] biomeNames = null;	// If defined, only apply rule to locations matching one of the biomes
     	int yPosMin = Integer.MIN_VALUE;	// If defined, only apply rule if pos.getY() >= yPosMin
     	int yPosMax = Integer.MAX_VALUE;	// If defined, pnly apply rule if pos.getY() <= yPosMax
-    	int rowOut = OUT_EQ_SRC, colOut = OUT_EQ_SRC;		// column, row for texture to be substituted
+    	int rowOut = OUT_EQ_SRC, colOut = OUT_EQ_SRC;		// column, row for texture to be substituted (or origin of pattern)
+    	int patWidth = 0, patHeight = 0;	// If nonzero, width and height of pattern with 0,0 at rowOut, colOut
     	
     	boolean isMatch(int txtIdx, int txtRow, int txtCol, String biomename, BlockPos pos) {
     		int y = pos.getY();
@@ -130,6 +133,14 @@ public class WesterosConditionHandler {
                         Preconditions.checkArgument(crec.get("colOut").isJsonPrimitive() && crec.get("colOut").getAsJsonPrimitive().isNumber(), "colOut must be a number!");
                 		crule.colOut = crec.get("colOut").getAsInt();
                 	}	
+                	if (crec.has("patternWidth")) {
+                        Preconditions.checkArgument(crec.get("patternWidth").isJsonPrimitive() && crec.get("patternWidth").getAsJsonPrimitive().isNumber(), "patternWidth must be a number!");
+                		crule.patWidth = crec.get("patternWidth").getAsInt();
+                	}
+                	if (crec.has("patternHeight")) {
+                        Preconditions.checkArgument(crec.get("patternHeight").isJsonPrimitive() && crec.get("patternHeight").getAsJsonPrimitive().isNumber(), "patternHeight must be a number!");
+                		crule.patHeight = crec.get("patternHeight").getAsInt();
+                	}	
                 }
             }
         }
@@ -146,15 +157,22 @@ public class WesterosConditionHandler {
     // @param txtCol - horizontal offset of match in source texture (e.g. 0-11 for CTM, etc)
     // @param world - world for test
     // @param pos - position in world
-    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex) {
+    // @param dir - direction of face
+    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex, Direction dir) {
     	// Find matching rule, if any
     	for (int i = 0; i < rules.length; i++) {
     		if (rules[i].isMatch(txtIdx, txtRow, txtRow, biomeName, pos)) {
-    			int rowOut = rules[i].rowOut;
-    			int colOut = rules[i].colOut;
+    			CondRule r = rules[i];
+    			int rowOut = r.rowOut;
+    			int colOut = r.colOut;
     			// If equivalence map, copy row/col indexes
     			if (rowOut == OUT_EQ_SRC) rowOut = txtRow;
     			if (colOut == OUT_EQ_SRC) colOut = txtCol;
+    			// If pattern to apply, apply it
+    			if ((r.patWidth > 1) || (r.patHeight > 1)) {
+    				rowOut = TextureContextWesterosPattern.getPatternRow(pos.getX(), pos.getY(), pos.getZ(), dir, r.patWidth) + r.rowOut;
+    				colOut = TextureContextWesterosPattern.getPatternCol(pos.getX(), pos.getY(), pos.getZ(), dir, r.patHeight) + r.colOut;
+    			}
     			// Return index for corresponding texture
     			return tex.getCompactedIndexFromTextureRowColumn(condIndex, rowOut, colOut);
     		}

@@ -10,6 +10,7 @@ import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
 import java.util.Optional;
 
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.TextureWesterosPattern;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -62,24 +63,20 @@ public class TextureContextWesterosPillar extends TextureContextCommon {
         		row = 0; col = 0;
         	}
         }    	
-        // Get index to be used for end caps (0, 0)
-    	int compactedIndexEnd, compactedIndexSide;
+    	String biomeName = null;
     	if (tex.handler != null) {
-        	String biomeName = getBiomeName(pos);
-    		compactedIndexEnd = tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex);
-    		compactedIndexSide = tex.handler.resolveCond(0, row, col, pos, biomeName, tex);
+        	biomeName = getBiomeName(pos);    		
     	}
-    	else {
-    		compactedIndexEnd = tex.getCompactedIndexFromTextureRowColumn(0, 0, 0);
-    		compactedIndexSide = tex.getCompactedIndexFromTextureRowColumn(0, row, col);
-    	}
+        // Get index to be used for end caps (0, 0)
     	for (Direction dir : Direction.values()) {
+    		int compactedIndex;
             if (axisVal != dir.getAxis()) {
-        		this.setCompactedIndexByDirection(dir, compactedIndexSide);
+        		compactedIndex = this.getTextureIndex(0, row, col, tex, pos, biomeName, dir);
             }
             else {
-        		this.setCompactedIndexByDirection(dir, compactedIndexEnd);
+        		compactedIndex = this.getTextureIndex(0, 0, 0, tex, pos, biomeName, dir);
             }
+    		this.setCompactedIndexByDirection(dir, compactedIndex);
     	}
     }    
 }
