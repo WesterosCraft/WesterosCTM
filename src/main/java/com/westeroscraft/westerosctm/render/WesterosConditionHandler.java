@@ -2,13 +2,29 @@ package com.westeroscraft.westerosctm.render;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import team.chisel.ctm.api.util.TextureInfo;
+
+import static team.chisel.ctm.client.util.ConnectionLocations.EAST;
+import static team.chisel.ctm.client.util.ConnectionLocations.NORTH;
+import static team.chisel.ctm.client.util.ConnectionLocations.SOUTH;
+import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
+import static team.chisel.ctm.client.util.ConnectionLocations.UP;
+import static team.chisel.ctm.client.util.ConnectionLocations.DOWN;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.westeroscraft.westerosctm.ctx.TextureContextWesterosHorizontal;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPattern;
+import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
 
 public class WesterosConditionHandler {
     public final int condWidth;
@@ -23,6 +39,12 @@ public class WesterosConditionHandler {
     private static final int MATCH_ANY = -1;
     private static final int OUT_EQ_SRC = -1;
     
+    public static final String TYPE_HORIZONTAL = "horizontal";
+    public static final String TYPE_PATTERN = "pattern";
+    public static final String TYPE_VERTICAL = "vertical";
+    
+    public static final Set<String> TYPES = new HashSet<String>(Arrays.asList(new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL }));
+    
     private static class CondRule {
     	SrcTexture[] source = null;	// If defined, only apply rule to source textures with given texture index, column, row
     	String[] biomeNames = null;	// If defined, only apply rule to locations matching one of the biomes
@@ -30,7 +52,7 @@ public class WesterosConditionHandler {
     	int yPosMax = Integer.MAX_VALUE;	// If defined, pnly apply rule if pos.getY() <= yPosMax
     	int rowOut = OUT_EQ_SRC, colOut = OUT_EQ_SRC;		// column, row for texture to be substituted (or origin of pattern)
     	int patWidth = 0, patHeight = 0;	// If nonzero, width and height of pattern with 0,0 at rowOut, colOut
-    	
+    	String type = null;		// If defined, function tyoe for output - roOut, colOut is origin of mapping specific to type (e.g. 2x2 for 'horizontal' or 'vertical')
     	boolean isMatch(int txtIdx, int txtRow, int txtCol, String biomename, BlockPos pos) {
     		int y = pos.getY();
     		if ((y < yPosMin) || (y > yPosMax)) return false;
@@ -136,11 +158,18 @@ public class WesterosConditionHandler {
                 	if (crec.has("patternWidth")) {
                         Preconditions.checkArgument(crec.get("patternWidth").isJsonPrimitive() && crec.get("patternWidth").getAsJsonPrimitive().isNumber(), "patternWidth must be a number!");
                 		crule.patWidth = crec.get("patternWidth").getAsInt();
+                		crule.type = TYPE_PATTERN;
                 	}
                 	if (crec.has("patternHeight")) {
                         Preconditions.checkArgument(crec.get("patternHeight").isJsonPrimitive() && crec.get("patternHeight").getAsJsonPrimitive().isNumber(), "patternHeight must be a number!");
                 		crule.patHeight = crec.get("patternHeight").getAsInt();
+                		crule.type = TYPE_PATTERN;
                 	}	
+                	if (crec.has("type")) {
+                        Preconditions.checkArgument(crec.get("type").isJsonPrimitive() && crec.get("type").getAsJsonPrimitive().isString(), "type must be a string!");
+                		crule.type = crec.get("type").getAsString();
+                        Preconditions.checkArgument(!TYPES.contains(crule.type), "type = " + crule.type + " is not supported!");
+                	}
                 }
             }
         }
@@ -157,8 +186,10 @@ public class WesterosConditionHandler {
     // @param txtCol - horizontal offset of match in source texture (e.g. 0-11 for CTM, etc)
     // @param world - world for test
     // @param pos - position in world
+    // @param biomeName - biome at location
+    // @param tex - texture 
     // @param dir - direction of face
-    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex, Direction dir) {
+    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockGetter world, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex, Direction dir) {
     	// Find matching rule, if any
     	for (int i = 0; i < rules.length; i++) {
     		if (rules[i].isMatch(txtIdx, txtRow, txtRow, biomeName, pos)) {
@@ -169,9 +200,28 @@ public class WesterosConditionHandler {
     			if (rowOut == OUT_EQ_SRC) rowOut = txtRow;
     			if (colOut == OUT_EQ_SRC) colOut = txtCol;
     			// If pattern to apply, apply it
-    			if ((r.patWidth > 1) || (r.patHeight > 1)) {
-    				rowOut = TextureContextWesterosPattern.getPatternRow(pos.getX(), pos.getY(), pos.getZ(), dir, r.patWidth) + r.rowOut;
-    				colOut = TextureContextWesterosPattern.getPatternCol(pos.getX(), pos.getY(), pos.getZ(), dir, r.patHeight) + r.colOut;
+    			if (TYPE_PATTERN.equals(r.type) && ((r.patWidth > 1) || (r.patHeight > 1))) {
+    				int rowcol = TextureContextWesterosPattern.getPatternRowCol(pos.getX(), pos.getY(), pos.getZ(), dir, r.patWidth, r.patHeight);
+    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
+    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;
+    			}
+    			else if (TYPE_HORIZONTAL.equals(r.type)) {	// If horizontal pattern
+    		        BlockState state = world.getBlockState(pos);
+    		    	boolean northConn = tex.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
+    		    	boolean southConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);
+    		    	boolean eastConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
+    		    	boolean westConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
+    				int rowcol = TextureContextWesterosHorizontal.getHorizontalRowCol(northConn, southConn, eastConn, westConn, dir);
+    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
+    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
+    			}
+    			else if (TYPE_VERTICAL.equals(r.type)) {	// If vertical pattern
+    		        BlockState state = world.getBlockState(pos);
+    		    	boolean upConn = tex.connectTo(state, world.getBlockState(UP.transform(pos)), Direction.UP);
+    		    	boolean downConn = tex.connectTo(state, world.getBlockState(DOWN.transform(pos)), Direction.DOWN);
+    				int rowcol = TextureContextWesterosPillar.getPillarRowCol(upConn, downConn, Axis.Y, dir);
+    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
+    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
     			}
     			// Return index for corresponding texture
     			return tex.getCompactedIndexFromTextureRowColumn(condIndex, rowOut, colOut);

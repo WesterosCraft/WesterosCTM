@@ -153,18 +153,16 @@ type.
 }
 </code>
 
-## type='westeros_pillar'
 
-This is an alternative to the 'pillar' method that specifically leverages the AXIS property
-to reliably determine the orientation of RotatedPillarBlock subclasses (such as logs and pillars). If used
-on a block that lacks the AXIS property, the block will be treated as being upright (axis=y), connecting vertically.
-It also expects only the base texture as a 2x2 map, so is more consistent with "ctm_vertical" than "pillar".
+## type='westeros_horizontal'
+
+This is an alternative to the 'ctm_horizontal' method.
 
 <code>
 {
   "ctm": {
     "ctm_version": 1,
-    "type": "westeros_pillar",
+    "type": "westeros_horizontal",
     "layer": "SOLID",
     "textures": [
     ],
@@ -172,8 +170,44 @@ It also expects only the base texture as a 2x2 map, so is more consistent with "
     }
   }
 }
-</code>
 
+## type='westeros_horizontal_cond'
+
+This is 'westeros_cond' method with the 'westeros_horizontal' method
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_horizontal_cond",
+    "layer": "SOLID",
+    "textures": [
+    ],
+    "extra": {
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
+    }
+  }
+}
+
+</code>
 ## type='westeros_vertical'
 
 This is an alternative to the 'ctm_vertical' method that handles crossed and rotated models better than
@@ -188,6 +222,44 @@ the standard one (particularly for stacked plants).
     "textures": [
     ],
     "extra": {
+    }
+  }
+}
+</code>
+
+## type='westeros_vertical_cond'
+
+This adds the 'westeros_cond' features to the 'westeros_vertical' function.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_vertical",
+    "layer": "SOLID",
+    "textures": [
+       "westerosblocks:block/forest_dirt/dirt0
+    ],
+    "extra": {
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
     }
   }
 }
@@ -273,6 +345,27 @@ default texture used corresponds to the row=0, col=0 texture from that image.
 </code>
 
 
+## type='westeros_pillar'
+
+This is an alternative to the 'pillar' method that specifically leverages the AXIS property
+to reliably determine the orientation of RotatedPillarBlock subclasses (such as logs and pillars). If used
+on a block that lacks the AXIS property, the block will be treated as being upright (axis=y), connecting vertically.
+It also expects only the base texture as a 2x2 map, so is more consistent with "ctm_vertical" than "pillar".
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_pillar",
+    "layer": "SOLID",
+    "textures": [
+    ],
+    "extra": {
+    }
+  }
+}
+</code>
+
 ## type='westeros_pillar_cond'
 
 This adds the 'westeros_cond' features to the 'westeros_pillar' function.
@@ -313,43 +406,6 @@ This adds the 'westeros_cond' features to the 'westeros_pillar' function.
 }
 </code>
 
-## type='westeros_vertical_cond'
-
-This adds the 'westeros_cond' features to the 'westeros_vertical' function.
-
-<code>
-{
-  "ctm": {
-    "ctm_version": 1,
-    "type": "westeros_vertical",
-    "layer": "SOLID",
-    "textures": [
-       "westerosblocks:block/forest_dirt/dirt0
-    ],
-    "extra": {
-       "condWidth": 1,
-       "condHeight": 2,
-       "conds": [
-          {
-            "biomeNames": [  
-                "minecraft:forest",
-     	        "minecraft:flower_forest",
-        	    "minecraft:dark_forest",
-            	"minecraft:jungle" ],
-            "rowOut": 0,
-            "colOut": 0
-          },
-          {
-            "yPosMin": 200,
-            "yPosMax": 383,
-            "rowOut": 0,
-            "colOut": 1
-          }
-     	]       
-    }
-  }
-}
-</code>
 
 ## type='westeros_pattern'
 
@@ -419,9 +475,11 @@ allow for connections to non-identical block states to be considered:
 - westeros_h+v
 - westeros_v+h
 - westeros_ctm+pattern
+- westeros_horizontal
+- westeros_horizontal_cond
 - westeros_pillar
-- westeros_vertical
 - westeros_pillar_cond
+- westeros_vertical
 - westeros_vertical_cond
 
 # Conditional override support
@@ -449,9 +507,18 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
      the rule matches.  If not provided, the row of the source image is used (row N in the source maps to row N in the substitution texture).
    - colOut: optional parameter indicating the 0-based column number in the provided substitution texture image to be used when
      the rule matches.  If not provided, the column of the source image is used (column N in the source maps to column N in the substitution texture).
-   - patternWidth, patternHeight: option parameter that indicates that the outpot should be produced by looking up the texture based on the block
+   - patternWidth, patternHeight: optional parameter that indicates that the outpot should be produced by looking up the texture based on the block
      position relative to a 'pattern' array in the conditional texture image - the pattern is at 'rowOut, colOut' to 
-	 'rowOut+patternHeight-1, colOut+patternWidth-1', and is used to select the replacement image.
+	 'rowOut+patternHeight-1, colOut+patternWidth-1', and is used to select the replacement image.  Setting these implies
+      'type' is 'pattern'.
+   - type: optional parameter for specifying an output mapping function.  Support values include:
+      - pattern: output texture is determined using the 'westeros_pattern' type mapping, using the grid of 'patternWidth' width and
+        'patternHeight' height whose top left corder is at row 'rowCol' and column 'colOut' in the substitution texture image.
+      - vertical: output texture is determined using the 'westeros_vertical' type mapping, using the 2 x 2 grid
+        whose top left corder is at row 'rowCol' and column 'colOut' in the substitution texture image.
+      - horizontal: output texture is determined using the 'westeros_horizontal' type mapping, using the 2 x 2 grid
+        whose top left corder is at row 'rowCol' and column 'colOut' in the substitution texture image.
+
 On CTMs supporting this feature, the substitution texture image is provided as one additional file added to the 'textures' array
 (that is, one additional texture file, beyond whatever the given CTM would otherwise expect).
 
@@ -466,4 +533,5 @@ The following CTMs support conditional substitution images:
 - westeros_vertical_cond
 - westeros_pillar_cond
 - westeros_pattern_cond
+- westeros_horizontal_cond
 

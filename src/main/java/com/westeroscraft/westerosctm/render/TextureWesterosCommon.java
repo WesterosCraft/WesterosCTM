@@ -40,6 +40,12 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
     	return (width << COMPACT_WIDTH_SHIFT) + (height << COMPACT_HEIGHT_SHIFT) + 
 			(prevLastOff + (width * height));
     }
+    // Compacted row/col encoding
+    public static final int getCol(int dim) { return (dim & COMPACT_WIDTH_MASK) >> COMPACT_WIDTH_SHIFT; }
+    public static final int getRow(int dim) { return (dim & COMPACT_HEIGHT_MASK) >> COMPACT_HEIGHT_SHIFT; }
+    public static final int makeRowCol(int row, int col) {
+    	return (col << COMPACT_WIDTH_SHIFT) + (row << COMPACT_HEIGHT_SHIFT);
+    }
     
     private static final BlockstatePredicateParser predicateParser = new BlockstatePredicateParser();
 
@@ -79,6 +85,7 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
         }    	
     }
     
+    @Override
     public boolean connectTo(BlockState from, BlockState to, Direction dir) {
         try {
             return (connectionChecks == null) ? 

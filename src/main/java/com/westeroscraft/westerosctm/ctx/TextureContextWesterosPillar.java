@@ -10,7 +10,6 @@ import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
 import java.util.Optional;
 
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
-import com.westeroscraft.westerosctm.render.TextureWesterosPattern;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +19,31 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TextureContextWesterosPillar extends TextureContextCommon {
+	
+	// Returns row and column in compactedDim format
+	public static final int getPillarRowCol(boolean upConn, boolean downConn, Axis axis, Direction dir) {
+        int row = 0, col = 0;
+        if (axis != dir.getAxis()) {
+        	// Compute patch for sides
+	        if (upConn) {
+	        	if (downConn) {
+	        		row = 1; col = 0;
+	        	}
+	        	else {
+	        		row = 1; col = 1;
+	        	}
+	        }
+	        else {
+	        	if (downConn) {
+	        		row = 0; col = 1;
+	        	}
+	        	else {
+	        		row = 0; col = 0;
+	        	}
+	        }    	
+        }
+        return TextureWesterosCommon.makeRowCol(row, col);
+	}
 	
     public TextureContextWesterosPillar(BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex,
 		boolean vertOnly) {
@@ -45,37 +69,15 @@ public class TextureContextWesterosPillar extends TextureContextCommon {
         	upConn = tex.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
         	downConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);       	        	
         }
-        // Compute patch for sides
-        int row = 0, col = 0;
-        if (upConn) {
-        	if (downConn) {
-        		row = 1; col = 0;
-        	}
-        	else {
-        		row = 1; col = 1;
-        	}
-        }
-        else {
-        	if (downConn) {
-        		row = 0; col = 1;
-        	}
-        	else {
-        		row = 0; col = 0;
-        	}
-        }    	
     	String biomeName = null;
     	if (tex.handler != null) {
         	biomeName = getBiomeName(pos);    		
     	}
         // Get index to be used for end caps (0, 0)
     	for (Direction dir : Direction.values()) {
-    		int compactedIndex;
-            if (axisVal != dir.getAxis()) {
-        		compactedIndex = this.getTextureIndex(0, row, col, tex, pos, biomeName, dir);
-            }
-            else {
-        		compactedIndex = this.getTextureIndex(0, 0, 0, tex, pos, biomeName, dir);
-            }
+    		int rowcol = getPillarRowCol(upConn, downConn, axisVal, dir);
+    		int compactedIndex = this.getTextureIndex(0, TextureWesterosCommon.getRow(rowcol), TextureWesterosCommon.getCol(rowcol), 
+    				tex, world, pos, biomeName, dir);
     		this.setCompactedIndexByDirection(dir, compactedIndex);
     	}
     }    

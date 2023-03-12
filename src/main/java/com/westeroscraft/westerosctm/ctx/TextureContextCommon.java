@@ -7,6 +7,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.biome.Biome;
 import team.chisel.ctm.api.texture.ITextureContext;
 
@@ -47,9 +48,9 @@ public abstract class TextureContextCommon implements ITextureContext {
     	return biomeName;
     }
     
-	protected int getTextureIndex(int tidx, int trow, int tcol, TextureWesterosCommon<?> tex, BlockPos pos, String biomeName, Direction dir) {
+	protected int getTextureIndex(int tidx, int trow, int tcol, TextureWesterosCommon<?> tex, BlockGetter world, BlockPos pos, String biomeName, Direction dir) {
 		if (tex.handler != null) {
-			return tex.handler.resolveCond(tidx, trow, tcol, pos, biomeName, tex, dir);
+			return tex.handler.resolveCond(tidx, trow, tcol, world, pos, biomeName, tex, dir);
 		}
 		else {
 			return tex.getCompactedIndexFromTextureRowColumn(tidx, trow, tcol);

@@ -25,6 +25,34 @@ public class TextureContextWesterosHorizontal extends TextureContextCommon {
 			return right ? 1 : 0;
 		}
 	}
+	// Returns row and column in compactedDim format
+	public static final int getHorizontalRowCol(boolean northConn, boolean southConn, boolean eastConn, boolean westConn,
+			Direction dir) {
+		switch (dir) {
+			case DOWN:
+				return 0;	// end cap
+			case UP:
+		        return 0; // end cap
+			case NORTH:
+				return TextureWesterosCommon.makeRowCol(
+						getRowByConnection(eastConn, westConn),
+						getColByConnection(eastConn, westConn));
+			case SOUTH:
+				return TextureWesterosCommon.makeRowCol(
+						getRowByConnection(westConn, eastConn),
+						getColByConnection(westConn, eastConn));
+			case WEST:
+				return TextureWesterosCommon.makeRowCol(
+						getRowByConnection(northConn, southConn),
+						getColByConnection(northConn, southConn));
+			case EAST:
+				return TextureWesterosCommon.makeRowCol(
+						getRowByConnection(southConn, northConn),
+						getColByConnection(southConn, northConn));
+		}
+		return 0;		
+	}
+			
     public TextureContextWesterosHorizontal(BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex) {
         BlockState state = world.getBlockState(pos);
         // Get side connections
@@ -33,37 +61,14 @@ public class TextureContextWesterosHorizontal extends TextureContextCommon {
     	boolean eastConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
     	boolean westConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
     	String biomeName = null;
-    	boolean hasHandler = false;
     	if (tex.handler != null) {
         	biomeName = getBiomeName(pos);
-        	hasHandler = true;
     	}
-    	// Set top and bottom
-    	int idx = hasHandler ? tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex, Direction.UP) : 
-    		tex.getCompactedIndexFromTextureRowColumn(0, 0, 0);
-    	this.setCompactedIndexByDirection(Direction.UP, idx);
-    	idx = hasHandler ? tex.handler.resolveCond(0, 0, 0, pos, biomeName, tex, Direction.DOWN) : 
-    		tex.getCompactedIndexFromTextureRowColumn(0, 0, 0);
-    	this.setCompactedIndexByDirection(Direction.DOWN, idx);
-        // Compute patch for NORTH (east=left, west=right)
-    	int row = getRowByConnection(eastConn, westConn), col = getColByConnection(eastConn, westConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.NORTH) : 
-    		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
-    	this.setCompactedIndexByDirection(Direction.NORTH, idx);
-        // Compute patch for SOUTH (west=left, east=right)
-    	row = getRowByConnection(westConn, eastConn); col = getColByConnection(westConn, eastConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.SOUTH) : 
-    		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
-    	this.setCompactedIndexByDirection(Direction.SOUTH, idx);
-        // Compute patch for EAST (south=left, north=right)
-    	row = getRowByConnection(southConn, northConn); col = getColByConnection(southConn, northConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.EAST) : 
-    		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
-    	this.setCompactedIndexByDirection(Direction.EAST, idx);
-        // Compute patch for WEST (north=left, south=right)
-    	row = getRowByConnection(northConn, southConn); col = getColByConnection(northConn, southConn);
-    	idx = hasHandler ? tex.handler.resolveCond(0, row, col, pos, biomeName, tex, Direction.WEST) : 
-    		tex.getCompactedIndexFromTextureRowColumn(0, row, col);
-    	this.setCompactedIndexByDirection(Direction.WEST, idx);
+    	for (Direction dir : Direction.values()) {
+    		int rowcol = getHorizontalRowCol(northConn, southConn, eastConn, westConn, dir);
+        	int idx = getTextureIndex(0, TextureWesterosCommon.getHeight(rowcol), TextureWesterosCommon.getWidth(rowcol), 
+    			tex, world, pos, biomeName, Direction.UP);
+        	this.setCompactedIndexByDirection(dir, idx);
+    	}
     }    
 }
