@@ -43,7 +43,7 @@ public class WesterosConditionHandler {
     public static final String TYPE_PATTERN = "pattern";
     public static final String TYPE_VERTICAL = "vertical";
     
-    public static final Set<String> TYPES = new HashSet<String>(Arrays.asList(new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL }));
+    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL };
     
     private static class CondRule {
     	SrcTexture[] source = null;	// If defined, only apply rule to source textures with given texture index, column, row
@@ -168,7 +168,9 @@ public class WesterosConditionHandler {
                 	if (crec.has("type")) {
                         Preconditions.checkArgument(crec.get("type").isJsonPrimitive() && crec.get("type").getAsJsonPrimitive().isString(), "type must be a string!");
                 		crule.type = crec.get("type").getAsString();
-                        Preconditions.checkArgument(!TYPES.contains(crule.type), "type = " + crule.type + " is not supported!");
+                		int idx;
+                		for (idx = 0; (idx < TYPES.length) && (!TYPES[idx].equals(crule.type)); idx++) {}
+                        Preconditions.checkArgument((idx < TYPES.length), "type = " + crule.type + " is not supported!");
                 	}
                 }
             }
