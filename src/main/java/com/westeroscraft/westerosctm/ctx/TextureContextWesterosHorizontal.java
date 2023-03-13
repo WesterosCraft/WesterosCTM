@@ -67,7 +67,7 @@ public class TextureContextWesterosHorizontal extends TextureContextCommon {
     	for (Direction dir : Direction.values()) {
     		int rowcol = getHorizontalRowCol(northConn, southConn, eastConn, westConn, dir);
         	int idx = getTextureIndex(0, TextureWesterosCommon.getHeight(rowcol), TextureWesterosCommon.getWidth(rowcol), 
-    			tex, world, pos, biomeName, Direction.UP);
+    			tex, world, pos, biomeName, dir);
         	this.setCompactedIndexByDirection(dir, idx);
     	}
     }    

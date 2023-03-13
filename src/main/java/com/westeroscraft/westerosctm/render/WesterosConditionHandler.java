@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.westeroscraft.westerosctm.WesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosHorizontal;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPattern;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
@@ -214,6 +215,8 @@ public class WesterosConditionHandler {
     		    	boolean eastConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
     		    	boolean westConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
     				int rowcol = TextureContextWesterosHorizontal.getHorizontalRowCol(northConn, southConn, eastConn, westConn, dir);
+    				//WesterosCTM.LOGGER.info(String.format("getHorizontalRowCol(%b, %b, %b, %b, %s) = %08x",
+    				//		northConn, southConn, eastConn, westConn, dir.toString(), rowcol));
     				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
     				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
     			}
