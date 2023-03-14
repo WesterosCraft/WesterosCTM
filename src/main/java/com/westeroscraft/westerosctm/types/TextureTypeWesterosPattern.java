@@ -1,8 +1,6 @@
 package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPattern;
-import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
-import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
 import com.westeroscraft.westerosctm.render.TextureWesterosPattern;
 
 import team.chisel.ctm.api.texture.ICTMTexture;

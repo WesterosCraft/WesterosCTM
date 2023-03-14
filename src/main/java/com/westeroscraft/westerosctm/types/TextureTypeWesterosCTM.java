@@ -1,7 +1,7 @@
 package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
-import com.westeroscraft.westerosctm.render.TextureWesterosCTM;
+import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,14 +18,21 @@ import team.chisel.ctm.api.util.TextureInfo;
 @OnlyIn(Dist.CLIENT)
 @TextureType("westeros_ctm")
 public class TextureTypeWesterosCTM implements ITextureType {
+	protected static final int compactedDims[];
+	static {
+		compactedDims = new int[48]; // base plus 47 image classic CTM
+		for (int i = 0; i < 48; i++) {
+			compactedDims[i] = TextureWesterosCommon.makeDim(1, 1, i);
+		}
+	}
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCTM> makeTexture(TextureInfo info) {
-      return new TextureWesterosCTM(this, info);
+      return new TextureWesterosCommon<TextureTypeWesterosCTM>(this, info, compactedDims, false);
     }
 
     @Override
     public ITextureContext getBlockRenderContext(BlockState state, BlockGetter world, BlockPos pos, ICTMTexture<?> tex) {
-        return new TextureContextWesterosCTM(state, world, pos, (TextureWesterosCTM) tex);
+        return new TextureContextWesterosCTM(world, pos, (TextureWesterosCommon<?>) tex);
      }
 
     @Override
