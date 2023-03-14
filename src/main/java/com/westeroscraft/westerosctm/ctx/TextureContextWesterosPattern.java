@@ -58,7 +58,7 @@ public class TextureContextWesterosPattern extends TextureContextCommon {
         for (Direction dir : Direction.values()) {
         	int rowcol = getPatternRowCol(x, y, z, dir, theight, twidth);
         	int cidx = getTextureIndex(0, TextureWesterosCommon.getHeight(rowcol), TextureWesterosCommon.getWidth(rowcol),
-    			tex, world, pos, biomeName, dir);
+    			tex, world, pos, biomeName, dir, -1);
             this.setCompactedIndexByDirection(dir, cidx);
         }
     }    

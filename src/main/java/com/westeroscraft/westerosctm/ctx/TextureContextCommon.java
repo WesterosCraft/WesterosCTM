@@ -48,9 +48,10 @@ public abstract class TextureContextCommon implements ITextureContext {
     	return biomeName;
     }
     
-	protected int getTextureIndex(int tidx, int trow, int tcol, TextureWesterosCommon<?> tex, BlockGetter world, BlockPos pos, String biomeName, Direction dir) {
+	protected int getTextureIndex(int tidx, int trow, int tcol, TextureWesterosCommon<?> tex, BlockGetter world, BlockPos pos, String biomeName,
+		Direction dir, long ctmConnBits) {
 		if (tex.handler != null) {
-			return tex.handler.resolveCond(tidx, trow, tcol, world, pos, biomeName, tex, dir);
+			return tex.handler.resolveCond(tidx, trow, tcol, world, pos, biomeName, tex, dir, ctmConnBits);
 		}
 		else {
 			return tex.getCompactedIndexFromTextureRowColumn(tidx, trow, tcol);

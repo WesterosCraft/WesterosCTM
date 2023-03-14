@@ -23,6 +23,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.westeroscraft.westerosctm.WesterosCTM;
+import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosHorizontal;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPattern;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
@@ -43,8 +44,9 @@ public class WesterosConditionHandler {
     public static final String TYPE_HORIZONTAL = "horizontal";
     public static final String TYPE_PATTERN = "pattern";
     public static final String TYPE_VERTICAL = "vertical";
+    public static final String TYPE_CTM = "ctm";
     
-    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL };
+    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM };
     
     private static class CondRule {
     	SrcTexture[] source = null;	// If defined, only apply rule to source textures with given texture index, column, row
@@ -192,7 +194,9 @@ public class WesterosConditionHandler {
     // @param biomeName - biome at location
     // @param tex - texture 
     // @param dir - direction of face
-    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockGetter world, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex, Direction dir) {
+    // @param ctmConnBits = CTM connection bits, or -1 if not computed
+    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockGetter world, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex,
+		Direction dir, long ctmConnBits) {
     	// Find matching rule, if any
     	for (int i = 0; i < rules.length; i++) {
     		if (rules[i].isMatch(txtIdx, txtRow, txtRow, biomeName, pos)) {
@@ -227,6 +231,16 @@ public class WesterosConditionHandler {
     				int rowcol = TextureContextWesterosPillar.getPillarRowCol(upConn, downConn, Axis.Y, dir);
     				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
     				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
+    			}
+    			else if (TYPE_CTM.equals(r.type)) {	// If CTM pattern (12 x 4)
+    				// If not computed, compute connection bits
+    				if (ctmConnBits == -1L) {
+    					ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex);
+    				}
+    				// Get sprite index
+    				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits, dir);
+    				rowOut = (spriteIndex / 12) + r.rowOut;
+    				colOut = (spriteIndex % 12) + r.colOut;    				
     			}
     			// Return index for corresponding texture
     			return tex.getCompactedIndexFromTextureRowColumn(condIndex, rowOut, colOut);

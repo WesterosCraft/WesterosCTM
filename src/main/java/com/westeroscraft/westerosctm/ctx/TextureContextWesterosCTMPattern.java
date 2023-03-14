@@ -13,13 +13,13 @@ public class TextureContextWesterosCTMPattern extends TextureContextWesterosCTMS
     }
     @Override
     public void handleCenterTexture(int spridx, Direction dir, BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex,
-		String biomeName) {
+		String biomeName, long ctmConnBits) {
     	// Get pattern index
     	int rowcol = TextureContextWesterosPattern.getPatternRowCol(pos.getX(), pos.getY(), pos.getZ(), 
     			dir, TextureWesterosCommon.getHeight(tex.compactedDims[2]), TextureWesterosCommon.getWidth(tex.compactedDims[2]));
     	// Apply conditional, if needed
     	int cidx = getTextureIndex(2, TextureWesterosCommon.getRow(rowcol), TextureWesterosCommon.getCol(rowcol),
-    			tex, world, pos, biomeName, dir);
+    			tex, world, pos, biomeName, dir, ctmConnBits);
 		this.setCompactedIndexByDirection(dir, cidx);    	
     }
 }

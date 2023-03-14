@@ -11,7 +11,7 @@ public class TextureContextWesterosCond extends TextureContextCommon {
     	String biomeName = getBiomeName(pos);
     	// Get index to be used for each side
     	for (Direction dir : Direction.values()) {
-        	int compactedIndex = tex.handler.resolveCond(0, 0, 0, world, pos, biomeName, tex, dir);
+        	int compactedIndex = tex.handler.resolveCond(0, 0, 0, world, pos, biomeName, tex, dir, -1);
     		this.setCompactedIndexByDirection(dir, compactedIndex);
     	}
     }

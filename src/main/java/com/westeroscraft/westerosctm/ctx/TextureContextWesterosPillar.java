@@ -77,7 +77,7 @@ public class TextureContextWesterosPillar extends TextureContextCommon {
     	for (Direction dir : Direction.values()) {
     		int rowcol = getPillarRowCol(upConn, downConn, axisVal, dir);
     		int compactedIndex = this.getTextureIndex(0, TextureWesterosCommon.getRow(rowcol), TextureWesterosCommon.getCol(rowcol), 
-    				tex, world, pos, biomeName, dir);
+    				tex, world, pos, biomeName, dir, -1);
     		this.setCompactedIndexByDirection(dir, compactedIndex);
     	}
     }    
