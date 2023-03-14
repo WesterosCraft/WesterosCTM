@@ -74,6 +74,91 @@ the 5 image compact CTM, this depends upon having 47 images listed in the "textu
 }
 </code>
 
+## type='westeros_ctm_ctm'
+
+Combines 'westeros_cond' function with 'westeros_ctm' function.  For example,
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_ctm_cond",
+    "layer": "SOLID",
+    "textures": [
+      "westerosblocks:block/ctm/westerosctm/ctm0",
+      "westerosblocks:block/ctm/westerosctm/ctm1",
+      "westerosblocks:block/ctm/westerosctm/ctm2",
+      "westerosblocks:block/ctm/westerosctm/ctm3",
+      "westerosblocks:block/ctm/westerosctm/ctm4",
+      "westerosblocks:block/ctm/westerosctm/ctm5",
+      "westerosblocks:block/ctm/westerosctm/ctm6",
+      "westerosblocks:block/ctm/westerosctm/ctm7",
+      "westerosblocks:block/ctm/westerosctm/ctm8",
+      "westerosblocks:block/ctm/westerosctm/ctm9",
+      "westerosblocks:block/ctm/westerosctm/ctm10",
+      "westerosblocks:block/ctm/westerosctm/ctm11",
+      "westerosblocks:block/ctm/westerosctm/ctm12",
+      "westerosblocks:block/ctm/westerosctm/ctm13",
+      "westerosblocks:block/ctm/westerosctm/ctm14",
+      "westerosblocks:block/ctm/westerosctm/ctm15",
+      "westerosblocks:block/ctm/westerosctm/ctm16",
+      "westerosblocks:block/ctm/westerosctm/ctm17",
+      "westerosblocks:block/ctm/westerosctm/ctm18",
+      "westerosblocks:block/ctm/westerosctm/ctm19",
+      "westerosblocks:block/ctm/westerosctm/ctm20",
+      "westerosblocks:block/ctm/westerosctm/ctm21",
+      "westerosblocks:block/ctm/westerosctm/ctm22",
+      "westerosblocks:block/ctm/westerosctm/ctm23",
+      "westerosblocks:block/ctm/westerosctm/ctm24",
+      "westerosblocks:block/ctm/westerosctm/ctm25",
+      "westerosblocks:block/ctm/westerosctm/ctm26",
+      "westerosblocks:block/ctm/westerosctm/ctm27",
+      "westerosblocks:block/ctm/westerosctm/ctm28",
+      "westerosblocks:block/ctm/westerosctm/ctm29",
+      "westerosblocks:block/ctm/westerosctm/ctm30",
+      "westerosblocks:block/ctm/westerosctm/ctm31",
+      "westerosblocks:block/ctm/westerosctm/ctm32",
+      "westerosblocks:block/ctm/westerosctm/ctm33",
+      "westerosblocks:block/ctm/westerosctm/ctm34",
+      "westerosblocks:block/ctm/westerosctm/ctm35",
+      "westerosblocks:block/ctm/westerosctm/ctm36",
+      "westerosblocks:block/ctm/westerosctm/ctm37",
+      "westerosblocks:block/ctm/westerosctm/ctm38",
+      "westerosblocks:block/ctm/westerosctm/ctm39",
+      "westerosblocks:block/ctm/westerosctm/ctm40",
+      "westerosblocks:block/ctm/westerosctm/ctm41",
+      "westerosblocks:block/ctm/westerosctm/ctm42",
+      "westerosblocks:block/ctm/westerosctm/ctm43",
+      "westerosblocks:block/ctm/westerosctm/ctm44",
+      "westerosblocks:block/ctm/westerosctm/ctm45",
+      "westerosblocks:block/ctm/westerosctm/ctm46",
+	  "westerosblocks:block/forest_dirt/dirt0
+    ],
+    "extra": {
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
+    }
+  }
+}
+</code>
+
 ## type='westeros_ctm_single'
 
 This is the same as 'westeros_ctm' in that it implements 47 texture classic CTM, except that this version relies on one additional image in 'textures', corresponding to the 12 columns and 4 rows template image for CTM (such as found at https://preview.redd.it/i22o64bmavb31.png?auto=webp&s=814a72b4ef512b75592bb87cb5f721afbcbe0be8 ).  For example, 
@@ -88,6 +173,45 @@ This is the same as 'westeros_ctm' in that it implements 47 texture classic CTM,
       "westerosblocks:block/ctm/westerosctmsingle_template"
     ],
     "extra": {
+    }
+  }
+}
+</code>
+
+## type='westeros_ctm_single_cond'
+
+Combines 'westeros_cond' function with 'westeros_ctm_single'.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_ctm_single_cond",
+    "layer": "SOLID",
+    "textures": [
+      "westerosblocks:block/ctm/westerosctmsingle_template",
+	  "westerosblocks:block/forest_dirt/dirt0
+    ],
+    "extra": {
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
     }
   }
 }
@@ -153,6 +277,49 @@ type.
 }
 </code>
 
+## type='westeros_ctm+pattern_cond'
+
+This is a layered combination of 'westeros_ctm_single' for all tiles but the 'middle' CTM tile (index 26 - no connection on any sides or corners).
+For the middle tile, the image is controlled by the second texture template, whose format corresponds to the ConnectedTexturesMod 'pattern'
+type.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_ctm+pattern_cond",
+    "layer": "SOLID",
+    "textures": [
+      "westerosblocks:block/ctm/westerosctmpattern_ctmtemplate",
+      "westerosblocks:block/ctm/westerosctmpattern_pattern_3x2",
+	  "westerosblocks:block/forest_dirt/dirt0
+    ],
+    "extra": {
+      "width": 3,
+      "height": 2,
+       "condWidth": 1,
+       "condHeight": 2,
+       "conds": [
+          {
+            "biomeNames": [  
+                "minecraft:forest",
+     	        "minecraft:flower_forest",
+        	    "minecraft:dark_forest",
+            	"minecraft:jungle" ],
+            "rowOut": 0,
+            "colOut": 0
+          },
+          {
+            "yPosMin": 200,
+            "yPosMax": 383,
+            "rowOut": 0,
+            "colOut": 1
+          }
+     	]       
+    }
+  }
+}
+</code>
 
 ## type='westeros_horizontal'
 
@@ -471,10 +638,13 @@ The following of these methods supports the "extra" data settings for "connect_t
 allow for connections to non-identical block states to be considered:
 
 - westeros_ctm
+- westeros_ctm_cond
 - westeros_ctm_single
+- westeros_ctm_single_cond
 - westeros_h+v
 - westeros_v+h
 - westeros_ctm+pattern
+- westeros_ctm+pattern_cond
 - westeros_horizontal
 - westeros_horizontal_cond
 - westeros_pillar
@@ -534,4 +704,7 @@ The following CTMs support conditional substitution images:
 - westeros_pillar_cond
 - westeros_pattern_cond
 - westeros_horizontal_cond
+- westeros_ctm_cond
+- westeros_ctm_single_cond
+- westeros_ctm+pattern_cond
 
