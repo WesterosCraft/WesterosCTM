@@ -681,15 +681,21 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
      position relative to a 'pattern' array in the conditional texture image - the pattern is at 'rowOut, colOut' to 
 	 'rowOut+patternHeight-1, colOut+patternWidth-1', and is used to select the replacement image.  Setting these implies
       'type' is 'pattern'.
+   - patternRow, patternCol: optional origin (top left corner) of 'type=pattern' grid in substitution texture, or for the pattern portion
+     pf the ctm+pattern type.
    - type: optional parameter for specifying an output mapping function.  Support values include:
       - pattern: output texture is determined using the 'westeros_pattern' type mapping, using the grid of 'patternWidth' width and
-        'patternHeight' height whose top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
+        'patternHeight' height whose top left corner is at row 'patternRow' and column 'patternCol' in the substitution texture image.
       - vertical: output texture is determined using the 'westeros_vertical' type mapping, using the 2 x 2 grid
         whose top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
       - horizontal: output texture is determined using the 'westeros_horizontal' type mapping, using the 2 x 2 grid
         whose top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
       - ctm: output texture is determined using the 'westeros_single_ctm' type mapping, using the 12 x 4 grid whose
-        top right corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
+        top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
+      - ctm+pattern: output texture is determined using the 'westeros_ctm+pattern' type mapping, using the 12 x 4 CTM grid
+        whose top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image, while
+        the pattern applied to the central textures are the pattern grid found at row 'patternRow' and column 'patternCol" with
+        a width of "patternWidth" and height of "patternHeight"
 
 On CTMs supporting this feature, the substitution texture image is provided as one additional file added to the 'textures' array
 (that is, one additional texture file, beyond whatever the given CTM would otherwise expect).

@@ -12,7 +12,7 @@ import team.chisel.ctm.api.util.TextureInfo;
 // 'pattern' ctm (width x height pattern in second extra image
 @OnlyIn(Dist.CLIENT)
 @TextureType("westeros_ctm+pattern_cond")
-public class TextureTypeWesterosCTMPatternCond extends TextureTypeWesterosCTMSingle {
+public class TextureTypeWesterosCTMPatternCond extends TextureTypeWesterosCTMPattern {
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCTM> makeTexture(TextureInfo info) {
 		return new TextureWesterosCTMPattern<TextureTypeWesterosCTM>(this, info, true);

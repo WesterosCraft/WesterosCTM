@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.BlockGetter;
 
 public class TextureContextWesterosCTM  extends TextureContextCommon {
-	public final int MIDDLE_TILE_INDEX = 26;	// Index of tile with connections on all 8 directions
+	public static final int MIDDLE_TILE_INDEX = 26;	// Index of tile with connections on all 8 directions
 
     // Map texture using CTM method (bit - 0: left, 1:up-left, 2:up, 3:up-right, 4:right, 5:down-right, 6:down, 7:down-left
     private static final int[] neighborMapCtm = new int[]{

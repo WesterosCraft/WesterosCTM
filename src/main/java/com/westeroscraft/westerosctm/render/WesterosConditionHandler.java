@@ -45,8 +45,9 @@ public class WesterosConditionHandler {
     public static final String TYPE_PATTERN = "pattern";
     public static final String TYPE_VERTICAL = "vertical";
     public static final String TYPE_CTM = "ctm";
+    public static final String TYPE_CTM_PATTERN = "ctm+pattern";
     
-    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM };
+    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN };
     
     private static class CondRule {
     	SrcTexture[] source = null;	// If defined, only apply rule to source textures with given texture index, column, row
@@ -55,6 +56,7 @@ public class WesterosConditionHandler {
     	int yPosMax = Integer.MAX_VALUE;	// If defined, pnly apply rule if pos.getY() <= yPosMax
     	int rowOut = OUT_EQ_SRC, colOut = OUT_EQ_SRC;		// column, row for texture to be substituted (or origin of pattern)
     	int patWidth = 0, patHeight = 0;	// If nonzero, width and height of pattern with 0,0 at rowOut, colOut
+    	int patRow = 0, patCol = 0;		// origin of pattern, for pattern and ctm+pattern pattern grid
     	String type = null;		// If defined, function tyoe for output - roOut, colOut is origin of mapping specific to type (e.g. 2x2 for 'horizontal' or 'vertical')
     	boolean isMatch(int txtIdx, int txtRow, int txtCol, String biomename, BlockPos pos) {
     		int y = pos.getY();
@@ -168,6 +170,14 @@ public class WesterosConditionHandler {
                 		crule.patHeight = crec.get("patternHeight").getAsInt();
                 		crule.type = TYPE_PATTERN;
                 	}	
+                	if (crec.has("patternRow")) {
+                        Preconditions.checkArgument(crec.get("patternRow").isJsonPrimitive() && crec.get("patternRow").getAsJsonPrimitive().isNumber(), "patternRow must be a number!");
+                		crule.patRow = crec.get("patternRow").getAsInt();
+                	}
+                	if (crec.has("patternCol")) {
+                        Preconditions.checkArgument(crec.get("patternCol").isJsonPrimitive() && crec.get("patternCol").getAsJsonPrimitive().isNumber(), "patternCol must be a number!");
+                		crule.patCol = crec.get("patternCol").getAsInt();
+                	}	
                 	if (crec.has("type")) {
                         Preconditions.checkArgument(crec.get("type").isJsonPrimitive() && crec.get("type").getAsJsonPrimitive().isString(), "type must be a string!");
                 		crule.type = crec.get("type").getAsString();
@@ -209,8 +219,8 @@ public class WesterosConditionHandler {
     			// If pattern to apply, apply it
     			if (TYPE_PATTERN.equals(r.type) && ((r.patWidth > 1) || (r.patHeight > 1))) {
     				int rowcol = TextureContextWesterosPattern.getPatternRowCol(pos.getX(), pos.getY(), pos.getZ(), dir, r.patWidth, r.patHeight);
-    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
-    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;
+    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.patRow;
+    				colOut = TextureWesterosCommon.getCol(rowcol) + r.patCol;
     			}
     			else if (TYPE_HORIZONTAL.equals(r.type)) {	// If horizontal pattern
     		        BlockState state = world.getBlockState(pos);
@@ -241,6 +251,25 @@ public class WesterosConditionHandler {
     				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits, dir);
     				rowOut = (spriteIndex / 12) + r.rowOut;
     				colOut = (spriteIndex % 12) + r.colOut;    				
+    			}
+    			else if (TYPE_CTM_PATTERN.equals(r.type)) {	// If CTM pattern (12 x 4) + pattern (patternWidth, patternHeight)
+    				// If not computed, compute connection bits
+    				if (ctmConnBits == -1L) {
+    					ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex);
+    				}
+    				// Get sprite index
+    				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits, dir);
+    				if (spriteIndex == TextureContextWesterosCTM.MIDDLE_TILE_INDEX) {
+    			    	// Get pattern index
+    			    	int rowcol = TextureContextWesterosPattern.getPatternRowCol(pos.getX(), pos.getY(), pos.getZ(), 
+    			    			dir, r.patHeight, r.patWidth);
+    			    	rowOut = TextureWesterosCommon.getRow(rowcol) + r.patRow;
+    			    	colOut = TextureWesterosCommon.getCol(rowcol) + r.patCol;
+    				}
+    				else {
+    					rowOut = (spriteIndex / 12) + r.rowOut;
+    					colOut = (spriteIndex % 12) + r.colOut;    		
+    				}
     			}
     			// Return index for corresponding texture
     			return tex.getCompactedIndexFromTextureRowColumn(condIndex, rowOut, colOut);
