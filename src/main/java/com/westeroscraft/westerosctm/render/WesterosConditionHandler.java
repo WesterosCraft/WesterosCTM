@@ -64,6 +64,7 @@ public class WesterosConditionHandler {
     	int patRow = 0, patCol = 0;		// origin of pattern, for pattern and ctm+pattern pattern grid
     	int weights[] = null;	// Weights for type=random (row*width + col]
     	int weightTotal;
+    	int rndOffX = 0, rndOffY = 0, rndOffZ = 0;	// position offset for random (for sake of consistency between adjacent blocks)
     	String type = TYPE_SIMPLE;
     	CondRule[] conds = null;	// If nested rules
     	boolean isMatch(int txtIdx, int txtRow, int txtCol, String biomename, BlockPos pos) {
@@ -179,6 +180,18 @@ public class WesterosConditionHandler {
         	if (crec.has("rndCol")) {
                 Preconditions.checkArgument(crec.get("rndCol").isJsonPrimitive() && crec.get("rndCol").getAsJsonPrimitive().isNumber(), "rndCol must be a number!");
         		crule.patCol = crec.get("rndCol").getAsInt();
+        	}
+        	if (crec.has("rndOffX")) {
+                Preconditions.checkArgument(crec.get("rndOffX").isJsonPrimitive() && crec.get("rndOffX").getAsJsonPrimitive().isNumber(), "rndOffX must be a number!");
+        		crule.rndOffX = crec.get("rndOffX").getAsInt();
+        	}
+        	if (crec.has("rndOffY")) {
+                Preconditions.checkArgument(crec.get("rndOffY").isJsonPrimitive() && crec.get("rndOffY").getAsJsonPrimitive().isNumber(), "rndOffY must be a number!");
+        		crule.rndOffY = crec.get("rndOffY").getAsInt();
+        	}
+        	if (crec.has("rndOffZ")) {
+                Preconditions.checkArgument(crec.get("rndOffZ").isJsonPrimitive() && crec.get("rndOffZ").getAsJsonPrimitive().isNumber(), "rndOffZ must be a number!");
+        		crule.rndOffZ = crec.get("rndOffZ").getAsInt();
         	}
             Preconditions.checkArgument((crule.patHeight * crule.patWidth > 0), "patternWidth and patternHeight must be nonzero!");
         	crule.weights = new int[crule.patHeight * crule.patWidth];
@@ -320,7 +333,13 @@ public class WesterosConditionHandler {
 	    				colOut = TextureWesterosCommon.getCol(rowcol) + r.patCol;
 	    			}
 	    			else if (TYPE_RANDOM.equals(r.type)) {
-	    				rand.setSeed(pos.asLong());
+						if (r.rndOffX == 0 && r.rndOffY == 0 && r.rndOffZ == 0) {
+	    					rand.setSeed(pos.asLong());
+	    				}
+	    				else {	// Apply offset, if nonzero
+	    					BlockPos bp = pos.offset(r.rndOffX, r.rndOffY, r.rndOffZ);
+	    					rand.setSeed(bp.asLong());
+	    				}
 	    				int w = rand.nextInt(r.weightTotal);
 	    				int rowcol = 0;
 	    				for (int idx = 0; idx < r.weights.length; idx++) {

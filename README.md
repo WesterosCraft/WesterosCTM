@@ -695,6 +695,16 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
          - ctmCol: column of top left corner of horizontal connection grid in subsitution texture image.  If not defined, 0 is assumed
       - "ctm+pattern": Matches mapped using "ctm" pattern, except middle texture (26 - row 2, col 2 of CTM grid) which is mapped using
          "pattern".  Parameters defined are same as those for "ctm" and those for "pattern".
+      - "random": Matched mapped to a random (block position deterministic) texture from weighted grid of choices:
+         - rndRow: row of top left corner of random grid in subsitution texture image.  If not defined, 0 is assumed
+         - rndCol: column of top left corner of random grid in subsitution texture image.  If not defined, 0 is assumed
+         - rndWidth: number of columns in the random grid.  If not defined, 1 is assumed
+         - rndHeight: number of rows in the random grod.  If not defined, 1 is assumed
+         - weights: if provided, list of weights for random selections (orded by column, then row, for the random grid).  If not provided
+           all textures in the grid have a consistent weight of 1.  Weight of zero will prevent texture from being selected.
+         - rndOffX: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
+         - rndOffY: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
+         - rndOffX: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
    - "conds": If defined, provides a set of nested rules that will be considered to further map the texture of the containing rule.
       Nested rules are only considered when the owning rule has matched, and is evaluated with the mapped texture as the source
       texture for matching the nested rules.
