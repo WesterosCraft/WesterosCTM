@@ -59,8 +59,9 @@ public class TextureContextWesterosCTM  extends TextureContextCommon {
     			getCTMConenctionBit(0, -1, 0), getCTMConenctionBit(0, -1, 1) }  	
     };
     		
-    public static int getSpriteIndex(long connBits, Direction dir) {
+    public static int getSpriteIndex(ConnectedBits ctmConnectedBits, Direction dir) {
     	int [] conns = connToDir[dir.ordinal()];	// Get mappings for this side
+    	long connBits = ctmConnectedBits.connectedBits;
         int index = (((connBits & (1L << conns[0])) != 0) ? 1 : 0) +
         		(((connBits & (1L << conns[7])) != 0) ? 2 : 0) +
         		(((connBits & (1L << conns[6])) != 0) ? 4 : 0) +
@@ -121,27 +122,28 @@ public class TextureContextWesterosCTM  extends TextureContextCommon {
     }
     
     public TextureContextWesterosCTM(BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex) {
-    	long flags = buildCTMConnectionBits(world, pos, tex);
+    	ConnectedBits cbits = new ConnectedBits();
+    	cbits.connectedBits = buildCTMConnectionBits(world, pos, tex);
     	String biomeName = null;
     	if (tex.handler != null) {
     		biomeName = this.getBiomeName(pos);
     	}
         for (Direction dir : Direction.values()) {
-        	int spridx = getSpriteIndex(flags, dir);	// Get sprite index
+        	int spridx = getSpriteIndex(cbits, dir);	// Get sprite index
         	if (spridx == MIDDLE_TILE_INDEX) {
-        		this.handleCenterTexture(spridx, dir, world, pos, tex, biomeName, flags);
+        		this.handleCenterTexture(spridx, dir, world, pos, tex, biomeName, cbits);
         	}
         	else {
         		// Do any conditional mapping, if needed
             	int cidx = getTextureIndex(getSpriteTxtIdx(spridx), getSpriteRow(spridx), getSpriteCol(spridx),
-            			tex, world, pos, biomeName, dir, flags);
+            			tex, world, pos, biomeName, dir, cbits);
         		this.setCompactedIndexByDirection(dir, cidx);
         	}
         }
     }    
     
     public void handleCenterTexture(int spridx, Direction dir, BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex,
-    		String biomeName, long ctmConnBits) {
+    		String biomeName, ConnectedBits ctmConnBits) {
     	int cidx = getTextureIndex(getSpriteTxtIdx(spridx), getSpriteRow(spridx), getSpriteCol(spridx),
     			tex, world, pos, biomeName, dir, ctmConnBits);
 		this.setCompactedIndexByDirection(dir, cidx);    	

@@ -61,13 +61,15 @@ public class TextureContextWesterosHorizontal extends TextureContextCommon {
     	boolean eastConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
     	boolean westConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
     	String biomeName = null;
+    	ConnectedBits cbits = null;
     	if (tex.handler != null) {
         	biomeName = getBiomeName(pos);
+        	cbits = new ConnectedBits();
     	}
     	for (Direction dir : Direction.values()) {
     		int rowcol = getHorizontalRowCol(northConn, southConn, eastConn, westConn, dir);
         	int idx = getTextureIndex(0, TextureWesterosCommon.getHeight(rowcol), TextureWesterosCommon.getWidth(rowcol), 
-    			tex, world, pos, biomeName, dir, -1);
+    			tex, world, pos, biomeName, dir, cbits);
         	this.setCompactedIndexByDirection(dir, idx);
     	}
     }    

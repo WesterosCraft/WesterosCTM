@@ -21,6 +21,7 @@ import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
 
 import com.google.common.collect.Lists;
+import com.westeroscraft.westerosctm.WesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextCommon;
 
 public class TextureWesterosCommon<T extends ITextureType> extends AbstractTexture<T>
@@ -119,6 +120,12 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
         int compactedIndex = ctext.getCompactedIndexByDirection(in.getDirection());
         //WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
         int txtIdx = this.getTextureIndexFromCompacted(compactedIndex);	// Get texture index
+        //if (txtIdx < 0) {
+        //    WesterosCTM.LOGGER.info(String.format("compactedIndex=%x, txtIdx=%d", compactedIndex, txtIdx));        	
+        //    for (int i = 0; i < compactedDims.length; i++) {
+        //    	WesterosCTM.LOGGER.info(String.format("compactedDims[%d]=%x", i, compactedDims[i]));        
+        //    }
+        //}
         int row = this.getRowFromCompactedIndex(compactedIndex, txtIdx);
         int col = this.getColumnFromCompactedIndex(compactedIndex, txtIdx);
         int width = getWidth(compactedDims[txtIdx]);

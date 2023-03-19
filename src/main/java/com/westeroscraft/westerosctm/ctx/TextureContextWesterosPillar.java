@@ -70,14 +70,16 @@ public class TextureContextWesterosPillar extends TextureContextCommon {
         	downConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);       	        	
         }
     	String biomeName = null;
+    	ConnectedBits cbits = null;
     	if (tex.handler != null) {
         	biomeName = getBiomeName(pos);    		
+        	cbits = new ConnectedBits();
     	}
         // Get index to be used for end caps (0, 0)
     	for (Direction dir : Direction.values()) {
     		int rowcol = getPillarRowCol(upConn, downConn, axisVal, dir);
     		int compactedIndex = this.getTextureIndex(0, TextureWesterosCommon.getRow(rowcol), TextureWesterosCommon.getCol(rowcol), 
-    				tex, world, pos, biomeName, dir, -1);
+    				tex, world, pos, biomeName, dir, cbits);
     		this.setCompactedIndexByDirection(dir, compactedIndex);
     	}
     }    

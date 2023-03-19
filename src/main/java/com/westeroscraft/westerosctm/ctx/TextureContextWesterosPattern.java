@@ -49,8 +49,10 @@ public class TextureContextWesterosPattern extends TextureContextCommon {
         int z = pos.getZ();
         // Get biome name, if needed
         String biomeName = null;
+        ConnectedBits cbits = null;
     	if (tex.handler != null) {
 			biomeName = getBiomeName(pos);
+			cbits = new ConnectedBits();
     	}
         // Pattern dimensions
         int twidth = TextureWesterosCommon.getWidth(tex.compactedDims[0]);
@@ -58,7 +60,7 @@ public class TextureContextWesterosPattern extends TextureContextCommon {
         for (Direction dir : Direction.values()) {
         	int rowcol = getPatternRowCol(x, y, z, dir, theight, twidth);
         	int cidx = getTextureIndex(0, TextureWesterosCommon.getHeight(rowcol), TextureWesterosCommon.getWidth(rowcol),
-    			tex, world, pos, biomeName, dir, -1);
+    			tex, world, pos, biomeName, dir, cbits);
             this.setCompactedIndexByDirection(dir, cidx);
         }
     }    

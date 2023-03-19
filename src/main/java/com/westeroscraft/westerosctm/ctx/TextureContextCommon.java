@@ -25,6 +25,10 @@ public abstract class TextureContextCommon implements ITextureContext {
     protected long compressedData; // 
     private static final long masks[] = { 0x3FFL, 0x3FFL << 10, 0x3FFL << 20, 0x3FFL << 30, 0x3FFL << 40, 0x3FFL << 50 }; 
 
+    public static class ConnectedBits {
+    	public long connectedBits = -1L;
+    };
+    
     public int getCompactedIndexByDirection(Direction dir) {
     	return (int)((compressedData >> (10 * dir.ordinal())) & 0x3FFL);
     }
@@ -49,7 +53,7 @@ public abstract class TextureContextCommon implements ITextureContext {
     }
     
 	protected int getTextureIndex(int tidx, int trow, int tcol, TextureWesterosCommon<?> tex, BlockGetter world, BlockPos pos, String biomeName,
-		Direction dir, long ctmConnBits) {
+		Direction dir, ConnectedBits ctmConnBits) {
 		if (tex.handler != null) {
 			return tex.handler.resolveCond(tidx, trow, tcol, world, pos, biomeName, tex, dir, ctmConnBits);
 		}
