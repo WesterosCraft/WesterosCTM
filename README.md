@@ -657,9 +657,9 @@ This is a new feature to enable substitution of textures with alternate textures
 rules sensitive to biome and/or Y coordinate ranges.  The syntax for these settings, which are provided in the
 "extra" section, is as follows:
 
-- condWidth: number of textures wide the provided substitution texture image is - if undefined, 1 is assumed
-- condHeight: number of textures high the provided substitution texture image is - if undefined, 1 is assumed
-- conds: An array of substitution rules.  Each rule is an object with the following fields
+- "condWidth": number of textures wide the provided substitution texture image is - if undefined, 1 is assumed
+- "condHeight": number of textures high the provided substitution texture image is - if undefined, 1 is assumed
+- "conds": An array of substitution rules.  Each rule is an object with the following fields
    - sources: an optional array of source texture coordinates: each of these objects is formated as follows:
       - index: index number of the input texture - if not defined, any index will match
       - row: base zero row in the input texture - if not defined, any row will match
@@ -667,35 +667,37 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
      If sources is not defined, the rule may match any source texture coordinate.  If provided, the rule only applies
      if the source texture is matches the provided coordinate.  For a westeros_cond, the single source texture would be
      { "index": 0, "row": 0, "col" 0 }, although no sources condition is needed for this case.
-   - biomeList: an optional list that, if defined, provides the fully qualified names for the biomes for which the rule
+   - "biomeList": an optional list that, if defined, provides the fully qualified names for the biomes for which the rule
      will match.  If not in "modid:biomename" form, "minecraft:biomename" is assumed.  If not provided, rule may match any biome.
-   - yPosMin: if specified, minimum Y coordinate for a block in order for the rule to match (Yblock >= yPosMin).  If not specified,
+   - "yPosMin": if specified, minimum Y coordinate for a block in order for the rule to match (Yblock >= yPosMin).  If not specified,
      no lower bound is assumed.
-   - yPosMax: if specified, maximum Y coordinate for a block in order for the rule to match (Yblock <= yPosMax).  If not specified,
+   - "yPosMax": if specified, maximum Y coordinate for a block in order for the rule to match (Yblock <= yPosMax).  If not specified,
      no upper bound is assumed.
-   - rowOut: optional parameter indicating the 0-based row number in the provided substitution texture image to be used when
-     the rule matches.  If not provided, the row of the source image is used (row N in the source maps to row N in the substitution texture).
-   - colOut: optional parameter indicating the 0-based column number in the provided substitution texture image to be used when
-     the rule matches.  If not provided, the column of the source image is used (column N in the source maps to column N in the substitution texture).
-   - patternWidth, patternHeight: optional parameter that indicates that the outpot should be produced by looking up the texture based on the block
-     position relative to a 'pattern' array in the conditional texture image - the pattern is at 'rowOut, colOut' to 
-	 'rowOut+patternHeight-1, colOut+patternWidth-1', and is used to select the replacement image.  Setting these implies
-      'type' is 'pattern'.
-   - patternRow, patternCol: optional origin (top left corner) of 'type=pattern' grid in substitution texture, or for the pattern portion
-     pf the ctm+pattern type.
-   - type: optional parameter for specifying an output mapping function.  Support values include:
-      - pattern: output texture is determined using the 'westeros_pattern' type mapping, using the grid of 'patternWidth' width and
-        'patternHeight' height whose top left corner is at row 'patternRow' and column 'patternCol' in the substitution texture image.
-      - vertical: output texture is determined using the 'westeros_vertical' type mapping, using the 2 x 2 grid
-        whose top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
-      - horizontal: output texture is determined using the 'westeros_horizontal' type mapping, using the 2 x 2 grid
-        whose top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
-      - ctm: output texture is determined using the 'westeros_single_ctm' type mapping, using the 12 x 4 grid whose
-        top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image.
-      - ctm+pattern: output texture is determined using the 'westeros_ctm+pattern' type mapping, using the 12 x 4 CTM grid
-        whose top left corner is at row 'rowCol' and column 'colOut' in the substitution texture image, while
-        the pattern applied to the central textures are the pattern grid found at row 'patternRow' and column 'patternCol" with
-        a width of "patternWidth" and height of "patternHeight"
+   - "type": Tyoe of mapping (if not defined, default is 'simple'):
+      - "simple": Simple mapping - matching texture is replaced with texture at row rowOut, column colOut from substitution texture image.
+         - rowOut: Specifies row of texture from substitution texture image to use in place of matching texture.  If not defined,
+           source "row" is used.
+         - colOut: Specifies column of texture from substitution texture image to use in place of matching texture.  If not defined,
+           source "col" is used.
+      - "pattern": Match mapped to a texture from a repeating pattern grid found at patRow, patCol with dimensions patWidth, patHeight.
+         - patRow: row of top left corner of pattern grid in subsitution texture image.  If not defined, 0 is assumed
+         - patCol: column of top left corner of pattern grid in subsitution texture image.  If not defined, 0 is assumed
+         - patWidth: number of columns in the pattern grid.  If not defined, 1 is assumed
+         - patHeight: number of rows in the pattern grod.  If not defined, 1 is assumed
+      - "ctm": Match mapped to a CTM grid found at ctmRow, ctmCol - width is 12, and height is 4
+         - ctmRow: row of top left corner of CTM grid in subsitution texture image.  If not defined, 0 is assumed
+         - ctmCol: column of top left corner of CTM grid in subsitution texture image.  If not defined, 0 is assumed
+      - "vertical": Match mapped to a vertically connection grid found at ctmRow, ctmCol - width is 2, and height is 2
+         - ctmRow: row of top left corner of vertical connection grid in subsitution texture image.  If not defined, 0 is assumed
+         - ctmCol: column of top left corner of vertical connection grid in subsitution texture image.  If not defined, 0 is assumed
+      - "horizontal": Match mapped to a horizontally connection grid found at ctmRow, ctmCol - width is 2, and height is 2
+         - ctmRow: row of top left corner of horizontal connection grid in subsitution texture image.  If not defined, 0 is assumed
+         - ctmCol: column of top left corner of horizontal connection grid in subsitution texture image.  If not defined, 0 is assumed
+      - "ctm+pattern": Matches mapped using "ctm" pattern, except middle texture (26 - row 2, col 2 of CTM grid) which is mapped using
+         "pattern".  Parameters defined are same as those for "ctm" and those for "pattern".
+   - "conds": If defined, provides a set of nested rules that will be considered to further map the texture of the containing rule.
+      Nested rules are only considered when the owning rule has matched, and is evaluated with the mapped texture as the source
+      texture for matching the nested rules.
 
 On CTMs supporting this feature, the substitution texture image is provided as one additional file added to the 'textures' array
 (that is, one additional texture file, beyond whatever the given CTM would otherwise expect).
