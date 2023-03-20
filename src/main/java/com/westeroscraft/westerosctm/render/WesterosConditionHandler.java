@@ -3,6 +3,7 @@ package com.westeroscraft.westerosctm.render;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import team.chisel.ctm.api.util.TextureInfo;
@@ -65,6 +66,7 @@ public class WesterosConditionHandler {
     	int weights[] = null;	// Weights for type=random (row*width + col]
     	int weightTotal;
     	int rndOffX = 0, rndOffY = 0, rndOffZ = 0;	// position offset for random (for sake of consistency between adjacent blocks)
+    	boolean rndSameAllSides = false;
     	String type = TYPE_SIMPLE;
     	CondRule[] conds = null;	// If nested rules
     	boolean isMatch(int txtIdx, int txtRow, int txtCol, String biomename, BlockPos pos) {
@@ -193,7 +195,11 @@ public class WesterosConditionHandler {
                 Preconditions.checkArgument(crec.get("rndOffZ").isJsonPrimitive() && crec.get("rndOffZ").getAsJsonPrimitive().isNumber(), "rndOffZ must be a number!");
         		crule.rndOffZ = crec.get("rndOffZ").getAsInt();
         	}
-            Preconditions.checkArgument((crule.patHeight * crule.patWidth > 0), "patternWidth and patternHeight must be nonzero!");
+        	if (crec.has("rndSameAllSides")) {
+        		Preconditions.checkArgument(crec.get("rndSameAllSides").isJsonPrimitive() && crec.get("rndSameAllSides").getAsJsonPrimitive().isBoolean(), "rndSameAllSides must be a boolean!");
+        		crule.rndSameAllSides = crec.get("rndSameAllSides").getAsBoolean();
+        	}
+            Preconditions.checkArgument((crule.patHeight * crule.patWidth) > 0, "patternWidth and patternHeight must be nonzero!");
         	crule.weights = new int[crule.patHeight * crule.patWidth];
         	Arrays.fill(crule.weights, 1);
         	if (crec.has("weights")) {
@@ -316,6 +322,7 @@ public class WesterosConditionHandler {
     	int txtOut = txtIdx;
 		int rowOut = txtRow;
 		int colOut = txtCol;
+		BlockState state = null;
 		while (rules != null) {
 			boolean matched = false;
 	    	// Find matching rule, if any
@@ -335,11 +342,12 @@ public class WesterosConditionHandler {
 	    			else if (TYPE_RANDOM.equals(r.type)) {
 						if (r.rndOffX == 0 && r.rndOffY == 0 && r.rndOffZ == 0) {
 	    					rand.setSeed(pos.asLong());
+				            rand.setSeed(Mth.getSeed(pos) + (r.rndSameAllSides ? 0 : dir.ordinal()));
 	    				}
 	    				else {	// Apply offset, if nonzero
-	    					BlockPos bp = pos.offset(r.rndOffX, r.rndOffY, r.rndOffZ);
-	    					rand.setSeed(bp.asLong());
+				            rand.setSeed(Mth.getSeed(pos.getX() + r.rndOffX, pos.getY() + r.rndOffY, pos.getZ() + r.rndOffZ) + (r.rndSameAllSides ? 0 : dir.ordinal()));
 	    				}
+			            rand.nextBoolean();
 	    				int w = rand.nextInt(r.weightTotal);
 	    				int rowcol = 0;
 	    				for (int idx = 0; idx < r.weights.length; idx++) {
@@ -351,7 +359,7 @@ public class WesterosConditionHandler {
 	    				colOut = (rowcol % r.patWidth) + r.patCol;
 	    			}
 	    			else if (TYPE_HORIZONTAL.equals(r.type)) {	// If horizontal pattern
-	    		        BlockState state = world.getBlockState(pos);
+	    		        if (state == null) state = world.getBlockState(pos);
 	    		    	boolean northConn = tex.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
 	    		    	boolean southConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);
 	    		    	boolean eastConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
@@ -363,7 +371,7 @@ public class WesterosConditionHandler {
 	    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
 	    			}
 	    			else if (TYPE_VERTICAL.equals(r.type)) {	// If vertical pattern
-	    		        BlockState state = world.getBlockState(pos);
+	    		        if (state == null) state = world.getBlockState(pos);
 	    		    	boolean upConn = tex.connectTo(state, world.getBlockState(UP.transform(pos)), Direction.UP);
 	    		    	boolean downConn = tex.connectTo(state, world.getBlockState(DOWN.transform(pos)), Direction.DOWN);
 	    				int rowcol = TextureContextWesterosPillar.getPillarRowCol(upConn, downConn, Axis.Y, dir);
