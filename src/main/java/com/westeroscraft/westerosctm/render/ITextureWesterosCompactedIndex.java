@@ -15,6 +15,4 @@ public interface ITextureWesterosCompactedIndex {
 	public int getCompactedIndexFromTextureRowColumn(int textureIndex, int row, int column);
 	// Test for connection in direction
     public boolean connectTo(BlockState from, BlockState to, Direction dir);
-    // Check if overlay
-    public boolean isOverlay();
 }

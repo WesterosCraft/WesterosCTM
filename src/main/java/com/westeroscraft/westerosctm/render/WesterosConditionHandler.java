@@ -25,6 +25,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.westeroscraft.westerosctm.WesterosCTM;
+import com.westeroscraft.westerosctm.ctx.TextureContextCommon;
 import com.westeroscraft.westerosctm.ctx.TextureContextCommon.ConnectedBits;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosHorizontal;
@@ -52,8 +53,9 @@ public class WesterosConditionHandler {
     public static final String TYPE_CTM_PATTERN = "ctm+pattern";
     public static final String TYPE_RANDOM = "random";
     public static final String TYPE_EDGES_FULL = "edges-full";
+    public static final String TYPE_NULL = "null";	// null quad
     
-    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN, TYPE_RANDOM, TYPE_EDGES_FULL };
+    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN, TYPE_RANDOM, TYPE_EDGES_FULL, TYPE_NULL };
     
     private static final java.util.Random rand = new java.util.Random();
 
@@ -93,6 +95,7 @@ public class WesterosConditionHandler {
     			if (!match) return false;
     		}
     		if ((isFancy != null) && (isFancy.booleanValue() != ItemBlockRenderTypes.renderCutout)) {
+    			WesterosCTM.LOGGER.info(String.format("isFancy=%s, renderCutout=%s",  isFancy, ItemBlockRenderTypes.renderCutout));
     			return false;
     		}
     		return true;
@@ -282,7 +285,7 @@ public class WesterosConditionHandler {
     	}
     	return crule;
     }
-    public WesterosConditionHandler(TextureInfo info, int condIndex, boolean overlay) {
+    public WesterosConditionHandler(TextureInfo info, int condIndex) {
         int cWidth = 1;	// Default to 1 x 1
         int cHeight = 1;
         CondRule[] crules = null;
@@ -304,9 +307,6 @@ public class WesterosConditionHandler {
                 for (JsonElement rec : clist) {
                 	JsonObject crec = rec.getAsJsonObject();
                 	CondRule crule = parseRule(crec);                	
-                	if (overlay) {
-                		WesterosCTM.LOGGER.info("Add rule to overlay");
-                	}
                 	crules[ruleidx] = crule;
                 	ruleidx++;
                 }
@@ -329,7 +329,7 @@ public class WesterosConditionHandler {
     // @param tex - texture 
     // @param dir - direction of face
     // @param ctmConnBits = CTM connection bits, or -1 if not computed
-    public int resolveCond(int txtIdx, int txtRow, int txtCol, BlockGetter world, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex,
+    public int resolveCond(final int txtIdx, final int txtRow, final int txtCol, BlockGetter world, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex,
 		Direction dir, ConnectedBits ctmConnBits) {
     	CondRule[] rules = this.conds;	// Start at top
     	// Default is to be unchanged
@@ -343,9 +343,8 @@ public class WesterosConditionHandler {
 	    	for (int i = 0; (!matched) && (i < rules.length); i++) {
 	    		if (rules[i].isMatch(txtOut, rowOut, colOut, biomeName, pos)) {
 	    			CondRule r = rules[i];
-	    			// Map to new texture and location
-	    			rowOut = (r.rowOut == OUT_EQ_SRC) ? rowOut : r.rowOut;
-	    			colOut = (r.colOut == OUT_EQ_SRC) ? colOut : r.colOut;
+	    			// We matched (at least almost all the time)
+	    			matched = true;
 	    			// If pattern to apply, apply it
 	    			if (TYPE_PATTERN.equals(r.type)) {
 	    				int rowcol = TextureContextWesterosPattern.getPatternRowCol(pos.getX(), pos.getY(), pos.getZ(), dir, r.patHeight, r.patWidth);
@@ -426,7 +425,7 @@ public class WesterosConditionHandler {
 	    				}
 		    			txtOut = condIndex;
 	    			}
-	    			else if (TYPE_EDGES_FULL.equals(r.type)) {	// If edges full pattern (4 x 4, with null fallthrough)
+	    			else if (TYPE_EDGES_FULL.equals(r.type)) {	// If edges full pattern (4 x 4, with original fallthrough)
 	    				// If not computed, compute connection bits
 	    				if (ctmConnBits.connectedBits == -1L) {
 	    					ctmConnBits.connectedBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex);
@@ -438,10 +437,23 @@ public class WesterosConditionHandler {
 	    					colOut = (spriteIndex % 4) + r.colOut;   
 	    	    			txtOut = condIndex;
 	    				}
+	    				else {	// If sprite, fall through to next rule
+	    					matched = false;
+	    				}
 	    			}
-	    			// We matched - exit look and process nested, if needed
-	    			matched = true;
-    				rules = r.conds;
+	    			else if (TYPE_NULL.equals(r.type)) {	// If null
+	    				// Return null quad - no nesting supported beyond this
+	    				return TextureContextCommon.COMPACTED_INDEX_NULL_QUAD;
+	    			}
+	    			else {
+		    			// Map to new texture and location
+		    			rowOut = (r.rowOut == OUT_EQ_SRC) ? rowOut : r.rowOut;
+		    			colOut = (r.colOut == OUT_EQ_SRC) ? colOut : r.colOut;
+	    			}
+	    			// If matched, check out nested rules
+	    			if (matched) {
+	    				rules = r.conds;
+	    			}
 	    		}
 	    	}
 	    	// If no match, we're done

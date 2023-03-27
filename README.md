@@ -722,8 +722,10 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
       - "horizontal": Match mapped to a horizontally connection grid found at ctmRow, ctmCol - width is 2, and height is 2
          - ctmRow: row of top left corner of horizontal connection grid in subsitution texture image.  If not defined, 0 is assumed
          - ctmCol: column of top left corner of horizontal connection grid in subsitution texture image.  If not defined, 0 is assumed
-      - "edges-full": Match mapped to an 'edges-full' equivalen  cnnection grid found at ctmRow, ctmCol - width is 4, and height is 4,
-         and unconnected patches are left with original texture
+      - "edges-full": Match mapped to an 'edges-full' equivalent connection grid found at ctmRow, ctmCol - width is 4, and height is 4,
+         and unconnected patches are left with original texture.  UNLIKE OTHER types, if the edges-full mapping does not map to one
+         of the substitution textures in the 4x4 grid (that is, the texture has no adjacent connections), the rule is considered
+         to have NOT matched, and the next rule will be evaluated, relative to the original source texture.
          - ctmRow: row of top left corner of edges-full connection grid in subsitution texture image.  If not defined, 0 is assumed
          - ctmCol: column of top left corner of edges-full connection grid in subsitution texture image.  If not defined, 0 is assumed
       - "ctm+pattern": Matches mapped using "ctm" pattern, except middle texture (26 - row 2, col 2 of CTM grid) which is mapped using

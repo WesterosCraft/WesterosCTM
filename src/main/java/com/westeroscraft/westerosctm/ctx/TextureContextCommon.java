@@ -21,10 +21,12 @@ import team.chisel.ctm.api.texture.ITextureContext;
 //   incrementing by column, then by row, then by texture.  The compacted index is
 //   encoded and decoded using the functions of the ITextureWesterosCompactedIndex interface,
 //   which is implemented by the TextureWesteros* texture classes.
+//   The highest compacted index value (0x3FF) is reserved for a null quad (no quad)
 public abstract class TextureContextCommon implements ITextureContext {
     protected long compressedData; // 
     private static final long masks[] = { 0x3FFL, 0x3FFL << 10, 0x3FFL << 20, 0x3FFL << 30, 0x3FFL << 40, 0x3FFL << 50 }; 
 
+    public static final int COMPACTED_INDEX_NULL_QUAD = 0x3FF;
     public static class ConnectedBits {
     	public long connectedBits = -1L;
     };

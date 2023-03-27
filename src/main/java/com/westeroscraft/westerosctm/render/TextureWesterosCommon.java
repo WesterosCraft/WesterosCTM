@@ -59,23 +59,14 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
 	@Nullable
 	private final BiPredicate<Direction, BlockState> connectionChecks;
 	
-	private final boolean overlay;	// If true, default is no quad
-
-	@Override
-    public boolean isOverlay() { return overlay; }
-
     public TextureWesterosCommon(T type, TextureInfo info, final int[] compactedDims, boolean conds) {
-    	this(type, info, compactedDims, conds, false);
-    }
-    public TextureWesterosCommon(T type, TextureInfo info, final int[] compactedDims, boolean conds, boolean overlay) {
         super(type, info);
         this.connectInside = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "connect_inside"));
         this.ignoreStates = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
         this.connectionChecks = info.getInfo().map(obj -> predicateParser.parse(obj.get("connect_to"))).orElse(null);
-        this.overlay = overlay;
 
         if (conds) {
-        	this.handler = new WesterosConditionHandler(info, compactedDims.length, overlay);
+        	this.handler = new WesterosConditionHandler(info, compactedDims.length);
         }
         else {
         	this.handler = null;
@@ -121,7 +112,6 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
     }
     
     private BakedQuad defaultTexture(BakedQuad quad, ITextureContext context) {
-    	if (overlay) return null;
         Quad q = makeQuad(quad, context);
     	float intervalU = 16f / getWidth(compactedDims[0]);
     	float intervalV = 16f / getHeight(compactedDims[0]);
@@ -132,11 +122,11 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
     private BakedQuad getQuad(BakedQuad in, ITextureContext context) {
         TextureContextCommon ctext = (TextureContextCommon) context;
         int compactedIndex = ctext.getCompactedIndexByDirection(in.getDirection());
-        // If overlay, and default index, skip quad
-    	if (overlay && (compactedIndex == 0)) {
-    		WesterosCTM.LOGGER.info(String.format("skip overlay %s", in.getDirection()));
-    		return null;
-    	}
+        // If null quad, drop it
+        if (compactedIndex == TextureContextCommon.COMPACTED_INDEX_NULL_QUAD) {
+            WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
+    		return null;        	
+        }
         //WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
         int txtIdx = this.getTextureIndexFromCompacted(compactedIndex);	// Get texture index
         //if (txtIdx < 0) {
