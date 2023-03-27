@@ -95,7 +95,6 @@ public class WesterosConditionHandler {
     			if (!match) return false;
     		}
     		if ((isFancy != null) && (isFancy.booleanValue() != ItemBlockRenderTypes.renderCutout)) {
-    			WesterosCTM.LOGGER.info(String.format("isFancy=%s, renderCutout=%s",  isFancy, ItemBlockRenderTypes.renderCutout));
     			return false;
     		}
     		return true;
