@@ -473,6 +473,33 @@ within a provided value range.
 }
 </code>
 
+## type='westeros_overlay_cond'
+
+This is the same as westerps_cond, except that a patch where none of the conditionals are matched will result in the patch
+being unrendered (a null quad) versus using the original texture.
+
+<code>
+{
+  "ctm": {
+    "ctm_version": 1,
+    "type": "westeros_overlay_cond",
+	"layer": "CUTOUT",
+    "textures": [ "westerosblocks:block/ctm/vertical_overlay_2x2" ],
+    "extra": {
+       "condWidth": 2,
+       "condHeight": 2,
+       "conds": [
+          {
+            "type": "vertical",
+            "ctmRow": 0,
+            "ctmCol": 0
+          }
+       ]       
+    }
+  }
+}
+</code>
+
 ## type='westeros_single_cond'
 
 This is a simple use of the conditional substitution support, where the substitution image is the base image, and the
@@ -641,6 +668,7 @@ allow for connections to non-identical block states to be considered:
 - westeros_ctm_cond
 - westeros_ctm_single
 - westeros_ctm_single_cond
+- westeros_ctm_overlay_cond
 - westeros_h+v
 - westeros_v+h
 - westeros_ctm+pattern
@@ -693,6 +721,10 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
       - "horizontal": Match mapped to a horizontally connection grid found at ctmRow, ctmCol - width is 2, and height is 2
          - ctmRow: row of top left corner of horizontal connection grid in subsitution texture image.  If not defined, 0 is assumed
          - ctmCol: column of top left corner of horizontal connection grid in subsitution texture image.  If not defined, 0 is assumed
+      - "edges-full": Match mapped to an 'edges-full' equivalen  cnnection grid found at ctmRow, ctmCol - width is 4, and height is 4,
+         and unconnected patches are left with original texture
+         - ctmRow: row of top left corner of edges-full connection grid in subsitution texture image.  If not defined, 0 is assumed
+         - ctmCol: column of top left corner of edges-full connection grid in subsitution texture image.  If not defined, 0 is assumed
       - "ctm+pattern": Matches mapped using "ctm" pattern, except middle texture (26 - row 2, col 2 of CTM grid) which is mapped using
          "pattern".  Parameters defined are same as those for "ctm" and those for "pattern".
       - "random": Matched mapped to a random (block position deterministic) texture from weighted grid of choices:

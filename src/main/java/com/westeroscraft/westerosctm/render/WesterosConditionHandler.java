@@ -50,8 +50,9 @@ public class WesterosConditionHandler {
     public static final String TYPE_CTM = "ctm";
     public static final String TYPE_CTM_PATTERN = "ctm+pattern";
     public static final String TYPE_RANDOM = "random";
+    public static final String TYPE_EDGES_FULL = "edges-full";
     
-    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN, TYPE_RANDOM };
+    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN, TYPE_RANDOM, TYPE_EDGES_FULL };
     
     private static final java.util.Random rand = new java.util.Random();
 
@@ -156,7 +157,8 @@ public class WesterosConditionHandler {
             Preconditions.checkArgument(crec.get("colOut").isJsonPrimitive() && crec.get("colOut").getAsJsonPrimitive().isNumber(), "colOut must be a number!");
     		crule.colOut = crec.get("colOut").getAsInt();
     	}	
-        if (crule.type.equals(TYPE_CTM) || crule.type.equals(TYPE_CTM_PATTERN) || crule.type.equals(TYPE_VERTICAL) || crule.type.equals(TYPE_HORIZONTAL)) {
+        if (crule.type.equals(TYPE_CTM) || crule.type.equals(TYPE_CTM_PATTERN) || crule.type.equals(TYPE_VERTICAL) || crule.type.equals(TYPE_HORIZONTAL) ||
+        		crule.type.equals(TYPE_EDGES_FULL)) {
         	if (crec.has("ctmRow")) {
                 Preconditions.checkArgument(crec.get("ctmRow").isJsonPrimitive() && crec.get("ctmRow").getAsJsonPrimitive().isNumber(), "ctmRow must be a number!");
         		crule.rowOut = crec.get("ctmRow").getAsInt();
@@ -335,12 +337,12 @@ public class WesterosConditionHandler {
 	    			// Map to new texture and location
 	    			rowOut = (r.rowOut == OUT_EQ_SRC) ? rowOut : r.rowOut;
 	    			colOut = (r.colOut == OUT_EQ_SRC) ? colOut : r.colOut;
-	    			txtOut = condIndex;
 	    			// If pattern to apply, apply it
 	    			if (TYPE_PATTERN.equals(r.type)) {
 	    				int rowcol = TextureContextWesterosPattern.getPatternRowCol(pos.getX(), pos.getY(), pos.getZ(), dir, r.patHeight, r.patWidth);
 	    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.patRow;
 	    				colOut = TextureWesterosCommon.getCol(rowcol) + r.patCol;
+		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_RANDOM.equals(r.type)) {
 						if (r.rndOffX == 0 && r.rndOffY == 0 && r.rndOffZ == 0) {
@@ -360,6 +362,7 @@ public class WesterosConditionHandler {
 	    				}
 	    				rowOut = (rowcol / r.patWidth) + r.patRow;
 	    				colOut = (rowcol % r.patWidth) + r.patCol;
+		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_HORIZONTAL.equals(r.type)) {	// If horizontal pattern
 	    		        if (state == null) state = world.getBlockState(pos);
@@ -372,6 +375,7 @@ public class WesterosConditionHandler {
 	    				//		northConn, southConn, eastConn, westConn, dir.toString(), rowcol));
 	    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
 	    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
+		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_VERTICAL.equals(r.type)) {	// If vertical pattern
 	    		        if (state == null) state = world.getBlockState(pos);
@@ -380,6 +384,7 @@ public class WesterosConditionHandler {
 	    				int rowcol = TextureContextWesterosPillar.getPillarRowCol(upConn, downConn, Axis.Y, dir);
 	    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
 	    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
+		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_CTM.equals(r.type)) {	// If CTM pattern (12 x 4)
 	    				// If not computed, compute connection bits
@@ -390,6 +395,7 @@ public class WesterosConditionHandler {
 	    				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits, dir);
 	    				rowOut = (spriteIndex / 12) + r.rowOut;
 	    				colOut = (spriteIndex % 12) + r.colOut;    				
+		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_CTM_PATTERN.equals(r.type)) {	// If CTM pattern (12 x 4) + pattern (patternWidth, patternHeight)
 	    				// If not computed, compute connection bits
@@ -408,6 +414,20 @@ public class WesterosConditionHandler {
 	    				else {
 	    					rowOut = (spriteIndex / 12) + r.rowOut;
 	    					colOut = (spriteIndex % 12) + r.colOut;    		
+	    				}
+		    			txtOut = condIndex;
+	    			}
+	    			else if (TYPE_EDGES_FULL.equals(r.type)) {	// If edges full pattern (4 x 4, with null fallthrough)
+	    				// If not computed, compute connection bits
+	    				if (ctmConnBits.connectedBits == -1L) {
+	    					ctmConnBits.connectedBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex);
+	    				}
+	    				// Get sprite index
+	    				int spriteIndex = TextureContextWesterosCTM.getFullEdgeIndex(ctmConnBits, dir);
+	    				if (spriteIndex >= 0) {	// Only if remapped
+	    					rowOut = (spriteIndex / 4) + r.rowOut;
+	    					colOut = (spriteIndex % 4) + r.colOut;   
+	    	    			txtOut = condIndex;
 	    				}
 	    			}
 	    			// We matched - exit look and process nested, if needed
