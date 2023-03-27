@@ -124,7 +124,7 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
         int compactedIndex = ctext.getCompactedIndexByDirection(in.getDirection());
         // If null quad, drop it
         if (compactedIndex == TextureContextCommon.COMPACTED_INDEX_NULL_QUAD) {
-            WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
+            //WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
     		return null;        	
         }
         //WesterosCTM.LOGGER.info("compactedIndex=" + compactedIndex);
