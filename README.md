@@ -701,7 +701,8 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
      no lower bound is assumed.
    - "yPosMax": if specified, maximum Y coordinate for a block in order for the rule to match (Yblock <= yPosMax).  If not specified,
      no upper bound is assumed.
-   - "type": Tyoe of mapping (if not defined, default is 'simple'):
+   - "isFancy": if specified, rule only matches if client mode for 'fancy' (leaves) is same as provided value (true=fancy mode, false=fast mode)
+   - "type": Type of mapping (if not defined, default is 'simple'):
       - "simple": Simple mapping - matching texture is replaced with texture at row rowOut, column colOut from substitution texture image.
          - rowOut: Specifies row of texture from substitution texture image to use in place of matching texture.  If not defined,
            source "row" is used.

@@ -1,5 +1,6 @@
 package com.westeroscraft.westerosctm.render;
 
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -61,6 +62,7 @@ public class WesterosConditionHandler {
     	String[] biomeNames = null;	// If defined, only apply rule to locations matching one of the biomes
     	int yPosMin = Integer.MIN_VALUE;	// If defined, only apply rule if pos.getY() >= yPosMin
     	int yPosMax = Integer.MAX_VALUE;	// If defined, pnly apply rule if pos.getY() <= yPosMax
+    	Boolean isFancy = null;		// If defined, only match if client is running fancy mode
     	int rowOut = OUT_EQ_SRC, colOut = OUT_EQ_SRC;		// column, row for texture to be substituted (or origin of pattern)
     	int patWidth = 1, patHeight = 1;	// width and height of pattern with 0,0 at patRow, patCol
     	int patRow = 0, patCol = 0;		// origin of pattern, for pattern and ctm+pattern pattern grid
@@ -89,6 +91,9 @@ public class WesterosConditionHandler {
     				match = biomeNames[i].equals(biomename);
     			}
     			if (!match) return false;
+    		}
+    		if ((isFancy != null) && (isFancy.booleanValue() != ItemBlockRenderTypes.renderCutout)) {
+    			return false;
     		}
     		return true;
     	}
@@ -142,6 +147,10 @@ public class WesterosConditionHandler {
             Preconditions.checkArgument(crec.get("yPosMax").isJsonPrimitive() && crec.get("yPosMax").getAsJsonPrimitive().isNumber(), "yPosMax must be a number!");
     		crule.yPosMax = crec.get("yPosMax").getAsInt();
     	}	
+    	if (crec.has("isFancy")) {
+            Preconditions.checkArgument(crec.get("isFancy").isJsonPrimitive() && crec.get("isFancy").getAsJsonPrimitive().isBoolean(), "isFancy must be a boolean");    		
+            crule.isFancy = crec.get("isFancy").getAsBoolean();
+    	}
     	if (crec.has("type")) {
             Preconditions.checkArgument(crec.get("type").isJsonPrimitive() && crec.get("type").getAsJsonPrimitive().isString(), "type must be a string!");
     		crule.type = crec.get("type").getAsString();
