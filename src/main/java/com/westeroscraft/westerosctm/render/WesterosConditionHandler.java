@@ -271,7 +271,7 @@ public class WesterosConditionHandler {
     	}
     	return crule;
     }
-    public WesterosConditionHandler(TextureInfo info, int condIndex) {
+    public WesterosConditionHandler(TextureInfo info, int condIndex, boolean overlay) {
         int cWidth = 1;	// Default to 1 x 1
         int cHeight = 1;
         CondRule[] crules = null;
@@ -293,6 +293,9 @@ public class WesterosConditionHandler {
                 for (JsonElement rec : clist) {
                 	JsonObject crec = rec.getAsJsonObject();
                 	CondRule crule = parseRule(crec);                	
+                	if (overlay) {
+                		WesterosCTM.LOGGER.info("Add rule to overlay");
+                	}
                 	crules[ruleidx] = crule;
                 	ruleidx++;
                 }
