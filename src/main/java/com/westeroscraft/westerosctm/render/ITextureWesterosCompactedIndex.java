@@ -1,7 +1,6 @@
 package com.westeroscraft.westerosctm.render;
 
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.state.BlockState;
+import java.util.List;
 
 // Interface for encode/decode of compacted texture indexes
 public interface ITextureWesterosCompactedIndex {
@@ -13,6 +12,6 @@ public interface ITextureWesterosCompactedIndex {
 	public int getColumnFromCompactedIndex(int compacted, int textureIdx);
 	// Make compacted index, given texture index, row, column
 	public int getCompactedIndexFromTextureRowColumn(int textureIndex, int row, int column);
-	// Test for connection in direction
-    public boolean connectTo(BlockState from, BlockState to, Direction dir);
+	// Get connection checks
+	public List<TextureWesterosCommon.ConnectionCheck> getConnectionChecks();
 }

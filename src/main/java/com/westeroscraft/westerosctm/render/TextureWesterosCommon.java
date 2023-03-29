@@ -1,8 +1,8 @@
 package com.westeroscraft.westerosctm.render;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import javax.annotation.Nullable;
@@ -21,7 +21,6 @@ import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
 
 import com.google.common.collect.Lists;
-import com.westeroscraft.westerosctm.WesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextCommon;
 
 public class TextureWesterosCommon<T extends ITextureType> extends AbstractTexture<T>
@@ -47,26 +46,50 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
     public static final int makeRowCol(int row, int col) {
     	return (col << COMPACT_WIDTH_SHIFT) + (row << COMPACT_HEIGHT_SHIFT);
     }
-    
-    private static final BlockstatePredicateParser predicateParser = new BlockstatePredicateParser();
+    public static final BlockstatePredicateParser predicateParser = new BlockstatePredicateParser();
 
-	private final Optional<Boolean> connectInside;
-	public Optional<Boolean> getConnectInside() { return connectInside; }
+	public static class ConnectionCheck implements ITextureWesterosConnectTo {
+		private final boolean ignoreStates;
+		
+		public final int connIndex;
+		@Nullable
+		private final BiPredicate<Direction, BlockState> connectionChecks;
+		public ConnectionCheck(int connIndex, boolean ignore, BiPredicate<Direction, BlockState> conncheck) {
+			this.connIndex = connIndex;
+			this.ignoreStates = ignore;
+			this.connectionChecks = conncheck;
+		}
+		@Override
+	    public boolean connectTo(BlockState from, BlockState to, Direction dir) {
+	        try {
+	            return (connectionChecks == null) ? 
+	            		(this.ignoreStates ? (from.getBlock() == to.getBlock()) :
+	        			(from == to)) :
+					connectionChecks.test(dir, to);
+	        } catch (Exception e) {
+	            throw new RuntimeException(e);
+	        }
+	    }    
+	}
 	
-	private final boolean ignoreStates;
-	public boolean getIgnoreStates() { return ignoreStates; }
+	public List<ConnectionCheck> connectionChecks = new ArrayList<ConnectionCheck>();
 	
-	@Nullable
-	private final BiPredicate<Direction, BlockState> connectionChecks;
-	
+	// Get connection checks
+	@Override
+	public List<TextureWesterosCommon.ConnectionCheck> getConnectionChecks() {
+		return connectionChecks;
+	}
+
     public TextureWesterosCommon(T type, TextureInfo info, final int[] compactedDims, boolean conds) {
         super(type, info);
-        this.connectInside = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "connect_inside"));
-        this.ignoreStates = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
-        this.connectionChecks = info.getInfo().map(obj -> predicateParser.parse(obj.get("connect_to"))).orElse(null);
-
+        // Set up base connection check
+        boolean ignoreStates = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
+        BiPredicate<Direction, BlockState> connChecks = info.getInfo().map(obj -> predicateParser.parse(obj.get("connect_to"))).orElse(null);
+        // Add as base connection check
+        connectionChecks.add(new ConnectionCheck(0, ignoreStates, connChecks));
+        
         if (conds) {
-        	this.handler = new WesterosConditionHandler(info, compactedDims.length);
+        	this.handler = new WesterosConditionHandler(info, compactedDims.length, connectionChecks);
         }
         else {
         	this.handler = null;
@@ -85,19 +108,7 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
         	this.compactedDims = compactedDims;
         }    	
     }
-    
-    @Override
-    public boolean connectTo(BlockState from, BlockState to, Direction dir) {
-        try {
-            return (connectionChecks == null) ? 
-            		(this.ignoreStates ? (from.getBlock() == to.getBlock()) :
-        			(from == to)) :
-				connectionChecks.test(dir, to);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }    
-    
+        
     @Override
     public List<BakedQuad> transformQuad(BakedQuad quad, ITextureContext context, int quadGoal) {
     	BakedQuad bq = null;

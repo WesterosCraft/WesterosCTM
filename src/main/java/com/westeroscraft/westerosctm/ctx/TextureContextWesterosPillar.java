@@ -7,9 +7,11 @@ import static team.chisel.ctm.client.util.ConnectionLocations.SOUTH;
 import static team.chisel.ctm.client.util.ConnectionLocations.UP;
 import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.TextureWesterosCommon.ConnectionCheck;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -57,29 +59,28 @@ public class TextureContextWesterosPillar extends TextureContextCommon {
         }
         // Get up/down connections, based on orientation
         boolean upConn = false, downConn = false;
+        ConnectionCheck cc = tex.connectionChecks.get(0);
         if (axisVal == Axis.Y) {
-        	upConn = tex.connectTo(state, world.getBlockState(UP.transform(pos)), Direction.UP);
-        	downConn = tex.connectTo(state, world.getBlockState(DOWN.transform(pos)), Direction.DOWN);
+        	upConn = cc.connectTo(state, world.getBlockState(UP.transform(pos)), Direction.UP);
+        	downConn = cc.connectTo(state, world.getBlockState(DOWN.transform(pos)), Direction.DOWN);
         }
         else if (axisVal == Axis.X) {
-        	upConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
-        	downConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
+        	upConn = cc.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
+        	downConn = cc.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
         }
         else {
-        	upConn = tex.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
-        	downConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);       	        	
+        	upConn = cc.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
+        	downConn = cc.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);       	        	
         }
     	String biomeName = null;
-    	ConnectedBits cbits = null;
     	if (tex.handler != null) {
         	biomeName = getBiomeName(pos);    		
-        	cbits = new ConnectedBits();
     	}
         // Get index to be used for end caps (0, 0)
     	for (Direction dir : Direction.values()) {
     		int rowcol = getPillarRowCol(upConn, downConn, axisVal, dir);
     		int compactedIndex = this.getTextureIndex(0, TextureWesterosCommon.getRow(rowcol), TextureWesterosCommon.getCol(rowcol), 
-    				tex, world, pos, biomeName, dir, cbits);
+    				tex, world, pos, biomeName, dir, null);
     		this.setCompactedIndexByDirection(dir, compactedIndex);
     	}
     }    

@@ -1,6 +1,7 @@
 package com.westeroscraft.westerosctm.ctx;
 
-import com.westeroscraft.westerosctm.render.ITextureWesterosCompactedIndex;
+import java.util.List;
+
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
 
 import net.minecraft.core.Direction;
@@ -67,9 +68,8 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 					getCTMConenctionBit(0, 1, -1), getCTMConenctionBit(0, 0, -1), getCTMConenctionBit(0, -1, -1),
 					getCTMConenctionBit(0, -1, 0), getCTMConenctionBit(0, -1, 1) } };
 
-	public static int getSpriteIndex(ConnectedBits ctmConnectedBits, Direction dir) {
+	public static int getSpriteIndex(long connBits, Direction dir) {
 		int[] conns = connToDir[dir.ordinal()]; // Get mappings for this side
-		long connBits = ctmConnectedBits.connectedBits;
 		int index = (((connBits & (1L << conns[0])) != 0) ? 1 : 0) + (((connBits & (1L << conns[7])) != 0) ? 2 : 0)
 				+ (((connBits & (1L << conns[6])) != 0) ? 4 : 0) + (((connBits & (1L << conns[5])) != 0) ? 8 : 0)
 				+ (((connBits & (1L << conns[4])) != 0) ? 16 : 0) + (((connBits & (1L << conns[3])) != 0) ? 32 : 0)
@@ -77,9 +77,8 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 		return neighborMapCtm[index];
 	}
 
-	public static int getFullEdgeIndex(ConnectedBits ctmConnectedBits, Direction dir) {
+	public static int getFullEdgeIndex(long connBits, Direction dir) {
 		int[] conns = connToDir[dir.ordinal()]; // Get mappings for this side
-		long connBits = ctmConnectedBits.connectedBits;
 		int index = (((connBits & (1L << conns[0])) != 0) ? 1 : 0) + (((connBits & (1L << conns[7])) != 0) ? 2 : 0)
 				+ (((connBits & (1L << conns[6])) != 0) ? 4 : 0) + (((connBits & (1L << conns[5])) != 0) ? 8 : 0)
 				+ (((connBits & (1L << conns[4])) != 0) ? 16 : 0) + (((connBits & (1L << conns[3])) != 0) ? 32 : 0)
@@ -93,30 +92,34 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 	}
 
 	// Bits are N = (dX + 1) + 3*(dY + 1) + 9*(dZ + 1)
-	public static long buildCTMConnectionBits(BlockGetter world, BlockPos pos, ITextureWesterosCompactedIndex tex) {
+	public static long[] buildCTMConnectionBits(BlockGetter world, BlockPos pos, List<TextureWesterosCommon.ConnectionCheck> cclist) {
 		BlockState state = world.getBlockState(pos);
-		long flags = 0;
+		int cccnt = cclist.size();
+		long flags[] = new long[cccnt];
 		for (Direction dir : Direction.values()) {
 			BlockPos p = pos.relative(dir);
-			// Get connection for primary direction
-			if (tex.connectTo(state, world.getBlockState(p), dir)) {
-				flags |= (1L << getCTMConenctionBit(dir.getStepX(), dir.getStepY(), dir.getStepZ()));
-			}
-			if (dir.getAxis() != Axis.Y) { // If side direction, check diagonals too (up and down)
-				if (tex.connectTo(state, world.getBlockState(p.above()), dir)) {
-					flags |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.UP.getStepY(), dir.getStepZ()));
+			for (int i = 0; i < cccnt; i++) {
+				TextureWesterosCommon.ConnectionCheck tex = cclist.get(i);
+				// Get connection for primary direction
+				if (tex.connectTo(state, world.getBlockState(p), dir)) {
+					flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), dir.getStepY(), dir.getStepZ()));
 				}
-				if (tex.connectTo(state, world.getBlockState(p.below()), dir)) {
-					flags |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.DOWN.getStepY(), dir.getStepZ()));
+				if (dir.getAxis() != Axis.Y) { // If side direction, check diagonals too (up and down)
+					if (tex.connectTo(state, world.getBlockState(p.above()), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.UP.getStepY(), dir.getStepZ()));
+					}
+					if (tex.connectTo(state, world.getBlockState(p.below()), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.DOWN.getStepY(), dir.getStepZ()));
+					}
 				}
-			}
-			// If north/south, check horizontal diagonals too
-			if (dir.getAxis() == Axis.Z) {
-				if (tex.connectTo(state, world.getBlockState(p.east()), dir)) {
-					flags |= (1L << getCTMConenctionBit(Direction.EAST.getStepX(), 0, dir.getStepZ()));
-				}
-				if (tex.connectTo(state, world.getBlockState(p.west()), dir)) {
-					flags |= (1L << getCTMConenctionBit(Direction.WEST.getStepX(), 0, dir.getStepZ()));
+				// If north/south, check horizontal diagonals too
+				if (dir.getAxis() == Axis.Z) {
+					if (tex.connectTo(state, world.getBlockState(p.east()), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(Direction.EAST.getStepX(), 0, dir.getStepZ()));
+					}
+					if (tex.connectTo(state, world.getBlockState(p.west()), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(Direction.WEST.getStepX(), 0, dir.getStepZ()));
+					}
 				}
 			}
 		}
@@ -139,27 +142,28 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 	}
 
 	public TextureContextWesterosCTM(BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex) {
-		ConnectedBits cbits = new ConnectedBits();
-		cbits.connectedBits = buildCTMConnectionBits(world, pos, tex);
 		String biomeName = null;
 		if (tex.handler != null) {
 			biomeName = this.getBiomeName(pos);
 		}
+		// Always need connection bits, so do here
+		long[] ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex.getConnectionChecks());
+		
 		for (Direction dir : Direction.values()) {
-			int spridx = getSpriteIndex(cbits, dir); // Get sprite index
+			int spridx = getSpriteIndex(ctmConnBits[0], dir); // Get sprite index
 			if (spridx == MIDDLE_TILE_INDEX) {
-				this.handleCenterTexture(spridx, dir, world, pos, tex, biomeName, cbits);
+				this.handleCenterTexture(spridx, dir, world, pos, tex, biomeName, ctmConnBits);
 			} else {
 				// Do any conditional mapping, if needed
 				int cidx = getTextureIndex(getSpriteTxtIdx(spridx), getSpriteRow(spridx), getSpriteCol(spridx), tex,
-						world, pos, biomeName, dir, cbits);
+						world, pos, biomeName, dir, ctmConnBits);
 				this.setCompactedIndexByDirection(dir, cidx);
 			}
 		}
 	}
 
 	public void handleCenterTexture(int spridx, Direction dir, BlockGetter world, BlockPos pos,
-			TextureWesterosCommon<?> tex, String biomeName, ConnectedBits ctmConnBits) {
+			TextureWesterosCommon<?> tex, String biomeName, long[] ctmConnBits) {
 		int cidx = getTextureIndex(getSpriteTxtIdx(spridx), getSpriteRow(spridx), getSpriteCol(spridx), tex, world, pos,
 				biomeName, dir, ctmConnBits);
 		this.setCompactedIndexByDirection(dir, cidx);

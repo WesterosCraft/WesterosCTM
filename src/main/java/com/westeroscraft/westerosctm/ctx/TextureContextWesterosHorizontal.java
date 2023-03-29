@@ -6,6 +6,7 @@ import static team.chisel.ctm.client.util.ConnectionLocations.SOUTH;
 import static team.chisel.ctm.client.util.ConnectionLocations.WEST;
 
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.TextureWesterosCommon.ConnectionCheck;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -55,21 +56,20 @@ public class TextureContextWesterosHorizontal extends TextureContextCommon {
 			
     public TextureContextWesterosHorizontal(BlockGetter world, BlockPos pos, TextureWesterosCommon<?> tex) {
         BlockState state = world.getBlockState(pos);
+		ConnectionCheck cc = tex.connectionChecks.get(0);
         // Get side connections
-    	boolean northConn = tex.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
-    	boolean southConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);
-    	boolean eastConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
-    	boolean westConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
+    	boolean northConn = cc.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
+    	boolean southConn = cc.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);
+    	boolean eastConn = cc.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
+    	boolean westConn = cc.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
     	String biomeName = null;
-    	ConnectedBits cbits = null;
     	if (tex.handler != null) {
         	biomeName = getBiomeName(pos);
-        	cbits = new ConnectedBits();
     	}
     	for (Direction dir : Direction.values()) {
     		int rowcol = getHorizontalRowCol(northConn, southConn, eastConn, westConn, dir);
         	int idx = getTextureIndex(0, TextureWesterosCommon.getHeight(rowcol), TextureWesterosCommon.getWidth(rowcol), 
-    			tex, world, pos, biomeName, dir, cbits);
+    			tex, world, pos, biomeName, dir, null);
         	this.setCompactedIndexByDirection(dir, idx);
     	}
     }    

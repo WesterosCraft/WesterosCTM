@@ -17,20 +17,19 @@ import static team.chisel.ctm.client.util.ConnectionLocations.UP;
 import static team.chisel.ctm.client.util.ConnectionLocations.DOWN;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.function.BiPredicate;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.westeroscraft.westerosctm.WesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextCommon;
-import com.westeroscraft.westerosctm.ctx.TextureContextCommon.ConnectedBits;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTM;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosHorizontal;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPattern;
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
+import com.westeroscraft.westerosctm.render.TextureWesterosCommon.ConnectionCheck;
 
 public class WesterosConditionHandler {
     public final int condWidth;
@@ -74,6 +73,9 @@ public class WesterosConditionHandler {
     	boolean rndSameAllSides = false;
     	String type = TYPE_SIMPLE;
     	CondRule[] conds = null;	// If nested rules
+    	
+    	private ConnectionCheck connCheck;
+
     	boolean isMatch(int txtIdx, int txtRow, int txtCol, String biomename, BlockPos pos) {
     		int y = pos.getY();
     		if ((y < yPosMin) || (y > yPosMax)) return false;
@@ -103,7 +105,7 @@ public class WesterosConditionHandler {
     
     private final CondRule[] conds;
     
-    private CondRule parseRule(JsonObject crec) {
+    private CondRule parseRule(JsonObject crec, ConnectionCheck parentConnCheck, List<ConnectionCheck> connectionChecks) {
     	CondRule crule = new CondRule();
     	if (crec.has("sources")) {
             Preconditions.checkArgument(crec.get("sources").isJsonArray(), "sources must be an array!");
@@ -269,6 +271,25 @@ public class WesterosConditionHandler {
 
             Preconditions.checkArgument((crule.patHeight * crule.patWidth > 0), "patWidth and patHeight must be nonzero!");
         }
+    	boolean newConn = false;
+    	boolean ignoreStates = false;
+    	BiPredicate<Direction, BlockState> connCheck = null;
+    	if (crec.has("ignore_states")) {
+            Preconditions.checkArgument(crec.get("ignore_states").isJsonPrimitive() && crec.get("ignore_states").getAsJsonPrimitive().isBoolean(), "ignore_states must be a boolean");    		
+            ignoreStates = crec.get("isFancy").getAsBoolean();    		
+            newConn = true;
+    	}
+    	if (crec.has("connect_to")) {
+    		connCheck = TextureWesterosCommon.predicateParser.parse(crec.get("connect_to"));
+            newConn = true;
+    	}
+    	if (newConn) {	// If new settings, assign new index
+    		crule.connCheck = new ConnectionCheck(connectionChecks.size(), ignoreStates, connCheck);
+    		connectionChecks.add(crule.connCheck);
+    	}
+    	else {
+    		crule.connCheck = parentConnCheck;
+    	}
     	// If any nested rules
     	if (crec.has("conds")) {
             Preconditions.checkArgument(crec.get("conds").isJsonArray(), "conds must be an array!");
@@ -277,14 +298,17 @@ public class WesterosConditionHandler {
             int ruleidx = 0;
             for (JsonElement rec : clist) {
             	JsonObject crec2 = rec.getAsJsonObject();
-            	CondRule crule2 = parseRule(crec2);                	
+            	CondRule crule2 = parseRule(crec2, crule.connCheck, connectionChecks);                	
             	crule.conds[ruleidx] = crule2;
             	ruleidx++;
             }
     	}
     	return crule;
     }
-    public WesterosConditionHandler(TextureInfo info, int condIndex) {
+    
+    public int connectionCount = 1;	// Always assume at least top level
+    
+    public WesterosConditionHandler(TextureInfo info, int condIndex, List<ConnectionCheck> connectionChecks) {
         int cWidth = 1;	// Default to 1 x 1
         int cHeight = 1;
         CondRule[] crules = null;
@@ -305,7 +329,7 @@ public class WesterosConditionHandler {
                 int ruleidx = 0;
                 for (JsonElement rec : clist) {
                 	JsonObject crec = rec.getAsJsonObject();
-                	CondRule crule = parseRule(crec);                	
+                	CondRule crule = parseRule(crec, connectionChecks.get(0), connectionChecks);                	
                 	crules[ruleidx] = crule;
                 	ruleidx++;
                 }
@@ -327,9 +351,9 @@ public class WesterosConditionHandler {
     // @param biomeName - biome at location
     // @param tex - texture 
     // @param dir - direction of face
-    // @param ctmConnBits = CTM connection bits, or -1 if not computed
+    // @param ctmConnBits - connection bits (if computed at top level, else null)
     public int resolveCond(final int txtIdx, final int txtRow, final int txtCol, BlockGetter world, BlockPos pos, String biomeName, ITextureWesterosCompactedIndex tex,
-		Direction dir, ConnectedBits ctmConnBits) {
+		Direction dir, long[] ctmConnBits) {
     	CondRule[] rules = this.conds;	// Start at top
     	// Default is to be unchanged
     	int txtOut = txtIdx;
@@ -373,10 +397,11 @@ public class WesterosConditionHandler {
 	    			}
 	    			else if (TYPE_HORIZONTAL.equals(r.type)) {	// If horizontal pattern
 	    		        if (state == null) state = world.getBlockState(pos);
-	    		    	boolean northConn = tex.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
-	    		    	boolean southConn = tex.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);
-	    		    	boolean eastConn = tex.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
-	    		    	boolean westConn = tex.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
+	    		        ConnectionCheck cc = r.connCheck;
+	    		    	boolean northConn = cc.connectTo(state, world.getBlockState(NORTH.transform(pos)), Direction.NORTH);
+	    		    	boolean southConn = cc.connectTo(state, world.getBlockState(SOUTH.transform(pos)), Direction.SOUTH);
+	    		    	boolean eastConn = cc.connectTo(state, world.getBlockState(EAST.transform(pos)), Direction.EAST);
+	    		    	boolean westConn = cc.connectTo(state, world.getBlockState(WEST.transform(pos)), Direction.WEST);
 	    				int rowcol = TextureContextWesterosHorizontal.getHorizontalRowCol(northConn, southConn, eastConn, westConn, dir);
 	    				//WesterosCTM.LOGGER.info(String.format("getHorizontalRowCol(%b, %b, %b, %b, %s) = %08x",
 	    				//		northConn, southConn, eastConn, westConn, dir.toString(), rowcol));
@@ -386,31 +411,34 @@ public class WesterosConditionHandler {
 	    			}
 	    			else if (TYPE_VERTICAL.equals(r.type)) {	// If vertical pattern
 	    		        if (state == null) state = world.getBlockState(pos);
-	    		    	boolean upConn = tex.connectTo(state, world.getBlockState(UP.transform(pos)), Direction.UP);
-	    		    	boolean downConn = tex.connectTo(state, world.getBlockState(DOWN.transform(pos)), Direction.DOWN);
+	    		        ConnectionCheck cc = r.connCheck;
+	    		    	boolean upConn = cc.connectTo(state, world.getBlockState(UP.transform(pos)), Direction.UP);
+	    		    	boolean downConn = cc.connectTo(state, world.getBlockState(DOWN.transform(pos)), Direction.DOWN);
 	    				int rowcol = TextureContextWesterosPillar.getPillarRowCol(upConn, downConn, Axis.Y, dir);
 	    				rowOut = TextureWesterosCommon.getRow(rowcol) + r.rowOut;
 	    				colOut = TextureWesterosCommon.getCol(rowcol) + r.colOut;    				
 		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_CTM.equals(r.type)) {	// If CTM pattern (12 x 4)
+	    				int ccidx = r.connCheck.connIndex;
 	    				// If not computed, compute connection bits
-	    				if (ctmConnBits.connectedBits == -1L) {
-	    					ctmConnBits.connectedBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex);
+	    				if (ctmConnBits == null) {
+	    					ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex.getConnectionChecks());
 	    				}
 	    				// Get sprite index
-	    				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits, dir);
+	    				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits[ccidx], dir);
 	    				rowOut = (spriteIndex / 12) + r.rowOut;
 	    				colOut = (spriteIndex % 12) + r.colOut;    				
 		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_CTM_PATTERN.equals(r.type)) {	// If CTM pattern (12 x 4) + pattern (patternWidth, patternHeight)
+	    				int ccidx = r.connCheck.connIndex;
 	    				// If not computed, compute connection bits
-	    				if (ctmConnBits.connectedBits == -1L) {
-	    					ctmConnBits.connectedBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex);
+	    				if (ctmConnBits == null) {
+	    					ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex.getConnectionChecks());
 	    				}
 	    				// Get sprite index
-	    				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits, dir);
+	    				int spriteIndex = TextureContextWesterosCTM.getSpriteIndex(ctmConnBits[ccidx], dir);
 	    				if (spriteIndex == TextureContextWesterosCTM.MIDDLE_TILE_INDEX) {
 	    			    	// Get pattern index
 	    			    	int rowcol = TextureContextWesterosPattern.getPatternRowCol(pos.getX(), pos.getY(), pos.getZ(), 
@@ -425,12 +453,13 @@ public class WesterosConditionHandler {
 		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_EDGES_FULL.equals(r.type)) {	// If edges full pattern (4 x 4, with original fallthrough)
+	    				int ccidx = r.connCheck.connIndex;
 	    				// If not computed, compute connection bits
-	    				if (ctmConnBits.connectedBits == -1L) {
-	    					ctmConnBits.connectedBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex);
+	    				if (ctmConnBits == null) {
+	    					ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex.getConnectionChecks());
 	    				}
 	    				// Get sprite index
-	    				int spriteIndex = TextureContextWesterosCTM.getFullEdgeIndex(ctmConnBits, dir);
+	    				int spriteIndex = TextureContextWesterosCTM.getFullEdgeIndex(ctmConnBits[ccidx], dir);
 	    				if (spriteIndex >= 0) {	// Only if remapped
 	    					rowOut = (spriteIndex / 4) + r.rowOut;
 	    					colOut = (spriteIndex % 4) + r.colOut;   
