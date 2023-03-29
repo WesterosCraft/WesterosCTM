@@ -728,8 +728,14 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
          to have NOT matched, and the next rule will be evaluated, relative to the original source texture.
          - ctmRow: row of top left corner of edges-full connection grid in subsitution texture image.  If not defined, 0 is assumed
          - ctmCol: column of top left corner of edges-full connection grid in subsitution texture image.  If not defined, 0 is assumed
+      - "overlay": Matches Optifine-style 'overlay' - width is 7, height is 3 (17 tiles used) found at ctmRow, ctmCol.
+         UNLIKE OTHER types, if the overlay mapping does not map to one of the substitution textures in the 4x4 grid (that is, the 
+         texture has no adjacent connections), the rule is considered to have NOT matched, and the next rule will be evaluated,
+         relative to the original source texture.
+         - ctmRow: row of top left corner of overlay connection grid in subsitution texture image.  If not defined, 0 is assumed
+         - ctmCol: column of top left corner of overlay connection grid in subsitution texture image.  If not defined, 0 is assumed
       - "ctm+pattern": Matches mapped using "ctm" pattern, except middle texture (26 - row 2, col 2 of CTM grid) which is mapped using
-         "pattern".  Parameters defined are same as those for "ctm" and those for "pattern".
+         "pattern".  Parameters defined are same as those for "ctm" and those for "pattern".  
       - "random": Matched mapped to a random (block position deterministic) texture from weighted grid of choices:
          - rndRow: row of top left corner of random grid in subsitution texture image.  If not defined, 0 is assumed
          - rndCol: column of top left corner of random grid in subsitution texture image.  If not defined, 0 is assumed
@@ -741,6 +747,8 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
          - rndOffY: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
          - rndOffX: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
          - rndSameAllSides: If set to true, random value used will be same for all sides of the same block; false will be side specific random (default)
+   - "ignoreStates": Override connect_to/ignoreStates from base (or parent) - boolean set to true if block=block test, false (default+ state match
+   - "connect_to": Override connect_to/ignoreStates from base (or parent) - as in base "extra"
    - "conds": If defined, provides a set of nested rules that will be considered to further map the texture of the containing rule.
       Nested rules are only considered when the owning rule has matched, and is evaluated with the mapped texture as the source
       texture for matching the nested rules.

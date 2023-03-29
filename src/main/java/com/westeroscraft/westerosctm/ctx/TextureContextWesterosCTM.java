@@ -39,6 +39,20 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 			9, 11, 9, 11, 9, 7, 9, 7, 9, 11, 9, 11, 9, 13, 3, 3, 3, 9, 9, 9, 9, 7, 3, 3, 3, 9, 9, 9, 9, 7, 9, 7, 9, 9,
 			9, 9, 9, 7, 9, 7, 9, 9, 9, 9, 9, 13, 3, 3, 3, 9, 9, 9, 9, 7, 3, 3, 3, 9, 9, 9, 9, 7, 9, 7, 9, 9, 9, 9, 9, 7,
 			9, 7, 9, 9, 9, 9, 9, };
+	// Map texture using Optifine style 'overlay method (bit - 0: left, 1:down-left,
+	// 2:down,
+	// 3:down-right,
+	// 4:right, 5:up-right, 6:up, 7:up-left
+	// -1=base, otherwise 4*row + col for 4x4
+	private static final int[] neighborMapOverlay = new int[] { -1, 9, 2, 9, 1, 4, 1, 4, 0, 9, 0, 9, 1, 4, 1, 4, 7, 7,
+			7, 7, 3, 5, 3, 5, 7, 7, 7, 7, 3, 5, 3, 5, 14, 9, 2, 9, 1, 4, 1, 4, 0, 9, 0, 9, 1, 4, 1, 4, 7, 7, 7, 7, 3, 5,
+			3, 5, 7, 7, 7, 7, 3, 5, 3, 5, 15, 11, 15, 11, 1, 6, 1, 6, 15, 11, 15, 11, 1, 6, 1, 6, 10, 13, 10, 13, 12, 8,
+			12, 8, 10, 13, 10, 13, 12, 8, 12, 8, 15, 11, 15, 11, 1, 6, 1, 6, 15, 11, 15, 11, 1, 6, 1, 6, 10, 13, 10, 13,
+			12, 8, 12, 8, 10, 13, 10, 13, 12, 8, 12, 8, 16, 9, 2, 9, 1, 4, 1, 4, 0, 9, 0, 9, 1, 4, 1, 4, 7, 7, 7, 7, 3,
+			5, 3, 5, 7, 7, 7, 7, 3, 5, 3, 5, 14, 9, 2, 9, 1, 4, 1, 4, 0, 9, 0, 9, 1, 4, 1, 4, 7, 7, 7, 7, 3, 5, 3, 5, 7,
+			7, 7, 7, 3, 5, 3, 5, 15, 11, 15, 11, 1, 6, 1, 6, 15, 11, 15, 11, 1, 6, 1, 6, 10, 13, 10, 13, 12, 8, 12, 8,
+			10, 13, 10, 13, 12, 8, 12, 8, 15, 11, 15, 11, 1, 6, 1, 6, 15, 11, 15, 11, 1, 6, 1, 6, 10, 13, 10, 13, 12, 8,
+			12, 8, 10, 13, 10, 13, 12, 8, 12, 8, };
 	// Mapping of connection bits for each side [by face direction ordinal][bit - 0:
 	// left, 1:up-left, 2:up, 3:up-right, 4:right, 5:down-right, 6:down,
 	// 7:down-left\
@@ -86,13 +100,23 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 		return neighborMapEdgesFull[index];
 	}
 
+	public static int getOverlayIndex(long connBits, Direction dir) {
+		int[] conns = connToDir[dir.ordinal()]; // Get mappings for this side
+		int index = (((connBits & (1L << conns[0])) != 0) ? 1 : 0) + (((connBits & (1L << conns[7])) != 0) ? 2 : 0)
+				+ (((connBits & (1L << conns[6])) != 0) ? 4 : 0) + (((connBits & (1L << conns[5])) != 0) ? 8 : 0)
+				+ (((connBits & (1L << conns[4])) != 0) ? 16 : 0) + (((connBits & (1L << conns[3])) != 0) ? 32 : 0)
+				+ (((connBits & (1L << conns[2])) != 0) ? 64 : 0) + (((connBits & (1L << conns[1])) != 0) ? 128 : 0);
+		return neighborMapOverlay[index];
+	}
+
 	public static final int getCTMConenctionBit(int dx, int dy, int dz) {
 		int v = (dx + 1) + (3 * (dy + 1)) + (9 * (dz + 1));
 		return v;
 	}
 
 	// Bits are N = (dX + 1) + 3*(dY + 1) + 9*(dZ + 1)
-	public static long[] buildCTMConnectionBits(BlockGetter world, BlockPos pos, List<TextureWesterosCommon.ConnectionCheck> cclist) {
+	public static long[] buildCTMConnectionBits(BlockGetter world, BlockPos pos,
+			List<TextureWesterosCommon.ConnectionCheck> cclist) {
 		BlockState state = world.getBlockState(pos);
 		int cccnt = cclist.size();
 		long flags[] = new long[cccnt];
@@ -106,10 +130,12 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 				}
 				if (dir.getAxis() != Axis.Y) { // If side direction, check diagonals too (up and down)
 					if (tex.connectTo(state, world.getBlockState(p.above()), dir)) {
-						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.UP.getStepY(), dir.getStepZ()));
+						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.UP.getStepY(),
+								dir.getStepZ()));
 					}
 					if (tex.connectTo(state, world.getBlockState(p.below()), dir)) {
-						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.DOWN.getStepY(), dir.getStepZ()));
+						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.DOWN.getStepY(),
+								dir.getStepZ()));
 					}
 				}
 				// If north/south, check horizontal diagonals too
@@ -148,7 +174,7 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 		}
 		// Always need connection bits, so do here
 		long[] ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex.getConnectionChecks());
-		
+
 		for (Direction dir : Direction.values()) {
 			int spridx = getSpriteIndex(ctmConnBits[0], dir); // Get sprite index
 			if (spridx == MIDDLE_TILE_INDEX) {

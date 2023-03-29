@@ -52,9 +52,11 @@ public class WesterosConditionHandler {
     public static final String TYPE_CTM_PATTERN = "ctm+pattern";
     public static final String TYPE_RANDOM = "random";
     public static final String TYPE_EDGES_FULL = "edges-full";
+    public static final String TYPE_OVERLAY = "overlay";
     public static final String TYPE_NULL = "null";	// null quad
     
-    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN, TYPE_RANDOM, TYPE_EDGES_FULL, TYPE_NULL };
+    public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN, TYPE_RANDOM,
+    		TYPE_EDGES_FULL, TYPE_NULL, TYPE_OVERLAY };
     
     private static final java.util.Random rand = new java.util.Random();
 
@@ -171,7 +173,7 @@ public class WesterosConditionHandler {
     		crule.colOut = crec.get("colOut").getAsInt();
     	}	
         if (crule.type.equals(TYPE_CTM) || crule.type.equals(TYPE_CTM_PATTERN) || crule.type.equals(TYPE_VERTICAL) || crule.type.equals(TYPE_HORIZONTAL) ||
-        		crule.type.equals(TYPE_EDGES_FULL)) {
+        		crule.type.equals(TYPE_EDGES_FULL) || crule.type.equals(TYPE_OVERLAY)) {
         	if (crec.has("ctmRow")) {
                 Preconditions.checkArgument(crec.get("ctmRow").isJsonPrimitive() && crec.get("ctmRow").getAsJsonPrimitive().isNumber(), "ctmRow must be a number!");
         		crule.rowOut = crec.get("ctmRow").getAsInt();
@@ -463,6 +465,23 @@ public class WesterosConditionHandler {
 	    				if (spriteIndex >= 0) {	// Only if remapped
 	    					rowOut = (spriteIndex / 4) + r.rowOut;
 	    					colOut = (spriteIndex % 4) + r.colOut;   
+	    	    			txtOut = condIndex;
+	    				}
+	    				else {	// If sprite, fall through to next rule
+	    					matched = false;
+	    				}
+	    			}
+	    			else if (TYPE_OVERLAY.equals(r.type)) {	// If overlay (17 textures, 7 x 3 pattern - as in Optifine)
+	    				int ccidx = r.connCheck.connIndex;
+	    				// If not computed, compute connection bits
+	    				if (ctmConnBits == null) {
+	    					ctmConnBits = TextureContextWesterosCTM.buildCTMConnectionBits(world, pos, tex.getConnectionChecks());
+	    				}
+	    				// Get sprite index
+	    				int spriteIndex = TextureContextWesterosCTM.getOverlayIndex(ctmConnBits[ccidx], dir);
+	    				if (spriteIndex >= 0) {	// Only if remapped
+	    					rowOut = (spriteIndex / 7) + r.rowOut;
+	    					colOut = (spriteIndex % 7) + r.colOut;   
 	    	    			txtOut = condIndex;
 	    				}
 	    				else {	// If sprite, fall through to next rule
