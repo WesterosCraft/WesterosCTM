@@ -273,13 +273,11 @@ public class WesterosConditionHandler {
         	if (crec.has("patWidth")) {
                 Preconditions.checkArgument(crec.get("patWidth").isJsonPrimitive() && crec.get("patWidth").getAsJsonPrimitive().isNumber(), "patWidth must be a number!");
         		crule.patWidth = crec.get("patWidth").getAsInt();
-        		crule.type = TYPE_PATTERN;
         		Preconditions.checkArgument((crule.patCol + crule.patWidth) <= cWidth, "patRow+patWidth must be less than or equal to condWidth");
         	}
         	if (crec.has("patHeight")) {
                 Preconditions.checkArgument(crec.get("patHeight").isJsonPrimitive() && crec.get("patHeight").getAsJsonPrimitive().isNumber(), "patHeight must be a number!");
         		crule.patHeight = crec.get("patHeight").getAsInt();
-        		crule.type = TYPE_PATTERN;
         		Preconditions.checkArgument((crule.patRow + crule.patHeight) <= cHeight, "patRow+patHeight must be less than or equal to condHeight");
         	}	
             Preconditions.checkArgument((crule.patHeight * crule.patWidth > 0), "patWidth and patHeight must be nonzero!");
