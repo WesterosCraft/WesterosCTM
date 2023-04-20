@@ -107,8 +107,10 @@ public class WesterosConditionHandler {
     
     private final CondRule[] conds;
     
-    private CondRule parseRule(JsonObject crec, ConnectionCheck parentConnCheck, List<ConnectionCheck> connectionChecks) {
+    private CondRule parseRule(JsonObject crec, ConnectionCheck parentConnCheck, List<ConnectionCheck> connectionChecks, String defType,
+    		int cWidth, int cHeight) {
     	CondRule crule = new CondRule();
+        crule.type = defType;	// Assume default type matching parent
     	if (crec.has("sources")) {
             Preconditions.checkArgument(crec.get("sources").isJsonArray(), "sources must be an array!");
             JsonArray srclist = crec.getAsJsonArray("sources");
@@ -167,39 +169,63 @@ public class WesterosConditionHandler {
     	if (crec.has("rowOut")) {
             Preconditions.checkArgument(crec.get("rowOut").isJsonPrimitive() && crec.get("rowOut").getAsJsonPrimitive().isNumber(), "rowOut must be a number!");
     		crule.rowOut = crec.get("rowOut").getAsInt();
+    		Preconditions.checkArgument(crule.rowOut < cHeight, "rowOut must be below condHeight");
     	}
     	if (crec.has("colOut")) {
             Preconditions.checkArgument(crec.get("colOut").isJsonPrimitive() && crec.get("colOut").getAsJsonPrimitive().isNumber(), "colOut must be a number!");
     		crule.colOut = crec.get("colOut").getAsInt();
+    		Preconditions.checkArgument(crule.colOut < cWidth, "colOut must be below condWidth");
     	}	
         if (crule.type.equals(TYPE_CTM) || crule.type.equals(TYPE_CTM_PATTERN) || crule.type.equals(TYPE_VERTICAL) || crule.type.equals(TYPE_HORIZONTAL) ||
         		crule.type.equals(TYPE_EDGES_FULL) || crule.type.equals(TYPE_OVERLAY)) {
         	if (crec.has("ctmRow")) {
                 Preconditions.checkArgument(crec.get("ctmRow").isJsonPrimitive() && crec.get("ctmRow").getAsJsonPrimitive().isNumber(), "ctmRow must be a number!");
         		crule.rowOut = crec.get("ctmRow").getAsInt();
+        		Preconditions.checkArgument(crule.rowOut < cHeight, "ctmRow must be below condHeight");
         	}
         	if (crec.has("ctmCol")) {
                 Preconditions.checkArgument(crec.get("ctmCol").isJsonPrimitive() && crec.get("ctmCol").getAsJsonPrimitive().isNumber(), "ctmCol must be a number!");
         		crule.colOut = crec.get("ctmCol").getAsInt();
+        		Preconditions.checkArgument(crule.colOut < cWidth, "ctmCol must be below condWidth");
         	}	
+            if (crule.type.equals(TYPE_CTM) || crule.type.equals(TYPE_CTM_PATTERN)) { // 12x4
+        		Preconditions.checkArgument((crule.rowOut + 4) <= cHeight, "ctmRow+4 must be below condHeight");
+        		Preconditions.checkArgument((crule.colOut + 12) <= cWidth, "ctmCol+12 must be below condWidth");            	
+            }
+            else if (crule.type.equals(TYPE_VERTICAL) || crule.type.equals(TYPE_HORIZONTAL)) { // 2x2
+        		Preconditions.checkArgument((crule.rowOut + 2) <= cHeight, "ctmRow+2 must be below condHeight");
+        		Preconditions.checkArgument((crule.colOut + 2) <= cWidth, "ctmCol+2 must be below condWidth");            	            	
+            }
+            else if (crule.type.equals(TYPE_EDGES_FULL)) { // 4x4
+        		Preconditions.checkArgument((crule.rowOut + 4) <= cHeight, "ctmRow+4 must be below condHeight");
+        		Preconditions.checkArgument((crule.colOut + 4) <= cWidth, "ctmCol+4 must be below condWidth");            	
+            }
+            else if (crule.type.equals(TYPE_OVERLAY)) {	// 7x3
+        		Preconditions.checkArgument((crule.rowOut + 3) <= cHeight, "ctmRow+3 must be below condHeight");
+        		Preconditions.checkArgument((crule.colOut + 7) <= cWidth, "ctmCol+7 must be below condWidth");            	
+            }
         }
         if (crule.type.equals(TYPE_RANDOM)) {
-        	if (crec.has("rndWidth")) {
-                Preconditions.checkArgument(crec.get("rndWidth").isJsonPrimitive() && crec.get("rndWidth").getAsJsonPrimitive().isNumber(), "rndWidth must be a number!");
-        		crule.patWidth = crec.get("rndWidth").getAsInt();
-        	}
-        	if (crec.has("rndHeight")) {
-                Preconditions.checkArgument(crec.get("rndHeight").isJsonPrimitive() && crec.get("rndHeight").getAsJsonPrimitive().isNumber(), "rndHeight must be a number!");
-        		crule.patHeight = crec.get("rndHeight").getAsInt();
-        	}	
         	if (crec.has("rndRow")) {
                 Preconditions.checkArgument(crec.get("rndRow").isJsonPrimitive() && crec.get("rndRow").getAsJsonPrimitive().isNumber(), "rndRow must be a number!");
         		crule.patRow = crec.get("rndRow").getAsInt();
+        		Preconditions.checkArgument(crule.patRow < cHeight, "rndRow must be below condHeight");
         	}
         	if (crec.has("rndCol")) {
                 Preconditions.checkArgument(crec.get("rndCol").isJsonPrimitive() && crec.get("rndCol").getAsJsonPrimitive().isNumber(), "rndCol must be a number!");
         		crule.patCol = crec.get("rndCol").getAsInt();
+        		Preconditions.checkArgument(crule.patCol < cWidth, "rndCol must be below condWidth");
         	}
+        	if (crec.has("rndWidth")) {
+                Preconditions.checkArgument(crec.get("rndWidth").isJsonPrimitive() && crec.get("rndWidth").getAsJsonPrimitive().isNumber(), "rndWidth must be a number!");
+        		crule.patWidth = crec.get("rndWidth").getAsInt();
+        		Preconditions.checkArgument((crule.patCol + crule.patWidth) <= cWidth, "rndRow+rndWidth must be less than or equal to condWidth");
+        	}
+        	if (crec.has("rndHeight")) {
+                Preconditions.checkArgument(crec.get("rndHeight").isJsonPrimitive() && crec.get("rndHeight").getAsJsonPrimitive().isNumber(), "rndHeight must be a number!");
+        		crule.patHeight = crec.get("rndHeight").getAsInt();
+        		Preconditions.checkArgument((crule.patRow + crule.patHeight) <= cHeight, "rndRow+rndHeight must be less than or equal to condHeight");
+        	}	
         	if (crec.has("rndOffX")) {
                 Preconditions.checkArgument(crec.get("rndOffX").isJsonPrimitive() && crec.get("rndOffX").getAsJsonPrimitive().isNumber(), "rndOffX must be a number!");
         		crule.rndOffX = crec.get("rndOffX").getAsInt();
@@ -234,43 +260,28 @@ public class WesterosConditionHandler {
         	}
     	}
         if (crule.type.equals(TYPE_PATTERN) || (crule.type.equals(TYPE_CTM_PATTERN))) {
-        	if (crec.has("patternWidth")) {
-                Preconditions.checkArgument(crec.get("patternWidth").isJsonPrimitive() && crec.get("patternWidth").getAsJsonPrimitive().isNumber(), "patternWidth must be a number!");
-        		crule.patWidth = crec.get("patternWidth").getAsInt();
-        		crule.type = TYPE_PATTERN;
+        	if (crec.has("patRow")) {
+                Preconditions.checkArgument(crec.get("patRow").isJsonPrimitive() && crec.get("patRow").getAsJsonPrimitive().isNumber(), "patRow must be a number!");
+        		crule.patRow = crec.get("patRow").getAsInt();
+        		Preconditions.checkArgument(crule.patRow < cHeight, "patRow must be below condHeight");
         	}
-        	if (crec.has("patternHeight")) {
-                Preconditions.checkArgument(crec.get("patternHeight").isJsonPrimitive() && crec.get("patternHeight").getAsJsonPrimitive().isNumber(), "patternHeight must be a number!");
-        		crule.patHeight = crec.get("patternHeight").getAsInt();
-        		crule.type = TYPE_PATTERN;
-        	}	
-        	if (crec.has("patternRow")) {
-                Preconditions.checkArgument(crec.get("patternRow").isJsonPrimitive() && crec.get("patternRow").getAsJsonPrimitive().isNumber(), "patternRow must be a number!");
-        		crule.patRow = crec.get("patternRow").getAsInt();
-        	}
-        	if (crec.has("patternCol")) {
-                Preconditions.checkArgument(crec.get("patternCol").isJsonPrimitive() && crec.get("patternCol").getAsJsonPrimitive().isNumber(), "patternCol must be a number!");
-        		crule.patCol = crec.get("patternCol").getAsInt();
+        	if (crec.has("patCol")) {
+                Preconditions.checkArgument(crec.get("patCol").isJsonPrimitive() && crec.get("patCol").getAsJsonPrimitive().isNumber(), "patCol must be a number!");
+        		crule.patCol = crec.get("patCol").getAsInt();
+        		Preconditions.checkArgument(crule.patCol < cWidth, "patCol must be below condWidth");
         	}
         	if (crec.has("patWidth")) {
                 Preconditions.checkArgument(crec.get("patWidth").isJsonPrimitive() && crec.get("patWidth").getAsJsonPrimitive().isNumber(), "patWidth must be a number!");
         		crule.patWidth = crec.get("patWidth").getAsInt();
         		crule.type = TYPE_PATTERN;
+        		Preconditions.checkArgument((crule.patCol + crule.patWidth) <= cWidth, "patRow+patWidth must be less than or equal to condWidth");
         	}
         	if (crec.has("patHeight")) {
                 Preconditions.checkArgument(crec.get("patHeight").isJsonPrimitive() && crec.get("patHeight").getAsJsonPrimitive().isNumber(), "patHeight must be a number!");
         		crule.patHeight = crec.get("patHeight").getAsInt();
         		crule.type = TYPE_PATTERN;
+        		Preconditions.checkArgument((crule.patRow + crule.patHeight) <= cHeight, "patRow+patHeight must be less than or equal to condHeight");
         	}	
-        	if (crec.has("patRow")) {
-                Preconditions.checkArgument(crec.get("patRow").isJsonPrimitive() && crec.get("patRow").getAsJsonPrimitive().isNumber(), "patRow must be a number!");
-        		crule.patRow = crec.get("patRow").getAsInt();
-        	}
-        	if (crec.has("patCol")) {
-                Preconditions.checkArgument(crec.get("patCol").isJsonPrimitive() && crec.get("patCol").getAsJsonPrimitive().isNumber(), "patCol must be a number!");
-        		crule.patCol = crec.get("patCol").getAsInt();
-        	}
-
             Preconditions.checkArgument((crule.patHeight * crule.patWidth > 0), "patWidth and patHeight must be nonzero!");
         }
     	boolean newConn = false;
@@ -300,7 +311,7 @@ public class WesterosConditionHandler {
             int ruleidx = 0;
             for (JsonElement rec : clist) {
             	JsonObject crec2 = rec.getAsJsonObject();
-            	CondRule crule2 = parseRule(crec2, crule.connCheck, connectionChecks);                	
+            	CondRule crule2 = parseRule(crec2, crule.connCheck, connectionChecks, defType, cWidth, cHeight);                	
             	crule.conds[ruleidx] = crule2;
             	ruleidx++;
             }
@@ -310,9 +321,9 @@ public class WesterosConditionHandler {
     
     public int connectionCount = 1;	// Always assume at least top level
     
-    public WesterosConditionHandler(TextureInfo info, int condIndex, List<ConnectionCheck> connectionChecks) {
-        int cWidth = 1;	// Default to 1 x 1
-        int cHeight = 1;
+    public WesterosConditionHandler(TextureInfo info, int condIndex, List<ConnectionCheck> connectionChecks, String defType, int defWidth, int defHeight) {
+        int cWidth = defWidth;
+        int cHeight = defHeight;
         CondRule[] crules = null;
         if (info.getInfo().isPresent()) {
             JsonObject object = info.getInfo().get();
@@ -331,7 +342,7 @@ public class WesterosConditionHandler {
                 int ruleidx = 0;
                 for (JsonElement rec : clist) {
                 	JsonObject crec = rec.getAsJsonObject();
-                	CondRule crule = parseRule(crec, connectionChecks.get(0), connectionChecks);                	
+                	CondRule crule = parseRule(crec, connectionChecks.get(0), connectionChecks, defType, cWidth, cHeight);                	
                 	crules[ruleidx] = crule;
                 	ruleidx++;
                 }
@@ -341,7 +352,7 @@ public class WesterosConditionHandler {
         this.condHeight = cHeight;
         this.condWidth = cWidth;
         this.condIndex = condIndex;
-        this.conds = (crules == null) ? new CondRule[0] : crules;
+        this.conds = (crules == null) ? new CondRule[0] : crules;        
     }
     
     // Resolve condition

@@ -2,6 +2,7 @@ package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosHorizontal;
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.WesterosConditionHandler;
 
 import team.chisel.ctm.api.texture.ICTMTexture;
 import team.chisel.ctm.api.texture.ITextureContext;
@@ -20,7 +21,7 @@ public class TextureTypeWesterosHorizontal implements ITextureType {
 	protected static final int compactedDims[] = { TextureWesterosCommon.makeDim(2, 2, 0) };
     @Override
     public ICTMTexture<TextureTypeWesterosHorizontal> makeTexture(TextureInfo info) {
-		return new TextureWesterosCommon<TextureTypeWesterosHorizontal>(this, info, compactedDims, false);
+		return new TextureWesterosCommon<TextureTypeWesterosHorizontal>(this, info, compactedDims, false, WesterosConditionHandler.TYPE_HORIZONTAL, 2, 2);
     }
     
     @Override

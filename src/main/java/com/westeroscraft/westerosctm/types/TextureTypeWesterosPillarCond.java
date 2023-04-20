@@ -2,6 +2,7 @@ package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosPillar;
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.WesterosConditionHandler;
 
 import team.chisel.ctm.api.texture.ICTMTexture;
 import team.chisel.ctm.api.texture.ITextureContext;
@@ -21,7 +22,7 @@ public class TextureTypeWesterosPillarCond implements ITextureType {
     @Override
     public ICTMTexture<TextureTypeWesterosPillarCond> makeTexture(TextureInfo info) {
         //return new TextureWesterosPillar(this, info, false);
-		return new TextureWesterosCommon<TextureTypeWesterosPillarCond>(this, info, compactedDims, true);
+		return new TextureWesterosCommon<TextureTypeWesterosPillarCond>(this, info, compactedDims, true, WesterosConditionHandler.TYPE_VERTICAL, 2, 2);
     }
     
     @Override

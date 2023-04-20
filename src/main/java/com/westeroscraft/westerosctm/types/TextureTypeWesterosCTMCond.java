@@ -1,6 +1,7 @@
 package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.WesterosConditionHandler;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -15,7 +16,7 @@ import team.chisel.ctm.api.util.TextureInfo;
 public class TextureTypeWesterosCTMCond extends TextureTypeWesterosCTM {
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCTMCond> makeTexture(TextureInfo info) {
-      return new TextureWesterosCommon<TextureTypeWesterosCTMCond>(this, info, compactedDims, true);
+      return new TextureWesterosCommon<TextureTypeWesterosCTMCond>(this, info, compactedDims, true, WesterosConditionHandler.TYPE_CTM, 12, 4);
     }
     @Override
     public int requiredTextures() {

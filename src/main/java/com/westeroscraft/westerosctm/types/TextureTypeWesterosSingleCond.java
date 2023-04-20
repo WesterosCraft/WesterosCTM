@@ -2,6 +2,7 @@ package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCond;
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.WesterosConditionHandler;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,7 +23,7 @@ public class TextureTypeWesterosSingleCond extends TextureTypeWesterosCond {
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCond> makeTexture(TextureInfo info) {
 		//return new TextureWesterosCond(this, info, 0);
-		return new TextureWesterosCommon<TextureTypeWesterosCond>(this, info, compactedDims, true);		
+		return new TextureWesterosCommon<TextureTypeWesterosCond>(this, info, compactedDims, true, WesterosConditionHandler.TYPE_SIMPLE, 1, 1);		
     }
 
     @Override

@@ -8,7 +8,7 @@ import team.chisel.ctm.api.util.TextureInfo;
 
 public class TextureWesterosPattern<T extends ITextureType> extends TextureWesterosCommon<T> {
 	public TextureWesterosPattern(T type, TextureInfo info, boolean conds) {
-        super(type, info, new int[1], conds);
+        super(type, info, new int[1], conds, WesterosConditionHandler.TYPE_PATTERN, 2, 2);
         int width = 2, height = 2;	// Default
         if (info.getInfo().isPresent()) {
             JsonObject object = info.getInfo().get();

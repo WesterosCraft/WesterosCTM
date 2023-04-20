@@ -80,7 +80,7 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
 		return connectionChecks;
 	}
 
-    public TextureWesterosCommon(T type, TextureInfo info, final int[] compactedDims, boolean conds) {
+    public TextureWesterosCommon(T type, TextureInfo info, final int[] compactedDims, boolean conds, String defType, int defWidth, int defHeight) {
         super(type, info);
         // Set up base connection check
         boolean ignoreStates = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
@@ -89,7 +89,7 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
         connectionChecks.add(new ConnectionCheck(0, ignoreStates, connChecks));
         
         if (conds) {
-        	this.handler = new WesterosConditionHandler(info, compactedDims.length, connectionChecks);
+        	this.handler = new WesterosConditionHandler(info, compactedDims.length, connectionChecks, defType, defWidth, defHeight);
         }
         else {
         	this.handler = null;

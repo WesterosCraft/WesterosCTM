@@ -2,6 +2,7 @@ package com.westeroscraft.westerosctm.types;
 
 import com.westeroscraft.westerosctm.ctx.TextureContextWesterosCTMSingle;
 import com.westeroscraft.westerosctm.render.TextureWesterosCommon;
+import com.westeroscraft.westerosctm.render.WesterosConditionHandler;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -20,7 +21,7 @@ public class TextureTypeWesterosCTMSingle extends TextureTypeWesterosCTM {
 	protected static final int compactedDims[] = new int[] { TextureWesterosCommon.makeDim(1, 1, 0), TextureWesterosCommon.makeDim(12, 4, 1) };
 	@Override
     public ICTMTexture<? extends TextureTypeWesterosCTM> makeTexture(TextureInfo info) {
-      return new TextureWesterosCommon<TextureTypeWesterosCTM>(this, info, compactedDims, false);
+      return new TextureWesterosCommon<TextureTypeWesterosCTM>(this, info, compactedDims, false, WesterosConditionHandler.TYPE_CTM, 12, 4);
     }
 
     @Override
