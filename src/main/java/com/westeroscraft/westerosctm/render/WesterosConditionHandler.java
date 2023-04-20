@@ -507,6 +507,7 @@ public class WesterosConditionHandler {
 		    			// Map to new texture and location
 		    			rowOut = (r.rowOut == OUT_EQ_SRC) ? rowOut : r.rowOut;
 		    			colOut = (r.colOut == OUT_EQ_SRC) ? colOut : r.colOut;
+		    			txtOut = condIndex;
 	    			}
 	    			// If matched, check out nested rules
 	    			if (matched) {
