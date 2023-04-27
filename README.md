@@ -747,8 +747,8 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
          - rndOffY: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
          - rndOffX: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
          - rndSameAllSides: If set to true, random value used will be same for all sides of the same block; false will be side specific random (default)
-   - "ignoreStates": Override connect_to/ignoreStates from base (or parent) - boolean set to true if block=block test, false (default+ state match
-   - "connect_to": Override connect_to/ignoreStates from base (or parent) - as in base "extra"
+   - "ignore_states": Override connect_to/ignore_states from base (or parent) - boolean set to true if block=block test, false (default+ state match
+   - "connect_to": Override connect_to/ignore_states from base (or parent) - as in base "extra"
    - "conds": If defined, provides a set of nested rules that will be considered to further map the texture of the containing rule.
       Nested rules are only considered when the owning rule has matched, and is evaluated with the mapped texture as the source
       texture for matching the nested rules.
