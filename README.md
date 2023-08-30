@@ -660,8 +660,13 @@ This adds the 'westeros_cond' features to the 'westeros_pattern' function.
 }
 </code>
 
-# connect_to, ignoreState Support
-The following of these methods supports the "extra" data settings for "connect_to" and "ignoreState", which
+# connect_to_tag Support
+This is a new connection logic option (alternative to connect_to or ignoreState).  When set to a string (corresponding to a
+block tag - format is <mod-id>:<tag-id> (or just <tag-id> for vanilla tags), a neighbor will be considered to be connected if and only
+if both the source block AND the neighbor block has the given block tag.
+
+# connect_to, ignoreState, connect_to_tag Support
+The following of these methods supports the "extra" data settings for "connect_to", "ignoreState", and "connect_to_tag", which
 allow for connections to non-identical block states to be considered:
 
 - westeros_ctm
@@ -747,8 +752,9 @@ rules sensitive to biome and/or Y coordinate ranges.  The syntax for these setti
          - rndOffY: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
          - rndOffX: if provided, block position offset appled when computing random (can be used to make random choices consistent on connected blocks)
          - rndSameAllSides: If set to true, random value used will be same for all sides of the same block; false will be side specific random (default)
-   - "ignore_states": Override connect_to/ignore_states from base (or parent) - boolean set to true if block=block test, false (default+ state match
-   - "connect_to": Override connect_to/ignore_states from base (or parent) - as in base "extra"
+   - "ignore_states": Override connect_to/ignore_states/connect_to_tag from base (or parent) - boolean set to true if block=block test, false (default+ state match
+   - "connect_to": Override connect_to/ignore_states/connect_to_tag from base (or parent) - as in base "extra"
+   - "connect_to_tag": Override connect_to/ignore_states/connect_to_tag from base (or parent)
    - "conds": If defined, provides a set of nested rules that will be considered to further map the texture of the containing rule.
       Nested rules are only considered when the owning rule has matched, and is evaluated with the mapped texture as the source
       texture for matching the nested rules.
