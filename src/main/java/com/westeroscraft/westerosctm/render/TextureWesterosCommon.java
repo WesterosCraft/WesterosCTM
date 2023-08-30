@@ -3,13 +3,19 @@ package com.westeroscraft.westerosctm.render;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 import team.chisel.ctm.api.texture.ISubmap;
 import team.chisel.ctm.api.texture.ITextureContext;
 import team.chisel.ctm.api.texture.ITextureType;
@@ -21,6 +27,8 @@ import team.chisel.ctm.client.util.Quad;
 import team.chisel.ctm.client.util.Submap;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.westeroscraft.westerosctm.ctx.TextureContextCommon;
 
 public class TextureWesterosCommon<T extends ITextureType> extends AbstractTexture<T>
@@ -48,24 +56,48 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
     }
     public static final BlockstatePredicateParser predicateParser = new BlockstatePredicateParser();
 
+    
 	public static class ConnectionCheck implements ITextureWesterosConnectTo {
 		private final boolean ignoreStates;
-		
+		private final TagKey<Block> connTag;
 		public final int connIndex;
+		private ConnectToFunction func;
 		@Nullable
 		private final BiPredicate<Direction, BlockState> connectionChecks;
-		public ConnectionCheck(int connIndex, boolean ignore, BiPredicate<Direction, BlockState> conncheck) {
+		public ConnectionCheck(int connIndex, boolean ignore, BiPredicate<Direction, BlockState> conncheck, String connTag) {
 			this.connIndex = connIndex;
 			this.ignoreStates = ignore;
 			this.connectionChecks = conncheck;
+			TagKey<Block> ct = null;
+			if (connTag != null) {
+				String[] parts = connTag.split(":");
+				ResourceLocation loc;
+				if (parts.length == 2) {
+					loc = new ResourceLocation(parts[0], parts[1]);
+				}
+				else {
+					loc = new ResourceLocation("minecraft", parts[0]);
+				}
+				ct = BlockTags.create(loc);
+			}
+			this.connTag = ct;
+			if (connectionChecks != null) {
+				func = (from, to, dir) -> connectionChecks.test(dir, to);
+			}
+			else if (connTag != null) {
+				func = (from, to, dir) -> from.is(ConnectionCheck.this.connTag) && to.is(ConnectionCheck.this.connTag);
+			}
+			else if (this.ignoreStates) {
+				func = (from, to, dir) -> from.getBlock() == to.getBlock();
+			}
+			else {
+				func = (from, to, dir) -> from == to;
+			}
 		}
 		@Override
 	    public boolean connectTo(BlockState from, BlockState to, Direction dir) {
 	        try {
-	            return (connectionChecks == null) ? 
-	            		(this.ignoreStates ? (from.getBlock() == to.getBlock()) :
-	        			(from == to)) :
-					connectionChecks.test(dir, to);
+	        	return func.apply(from, to, dir);
 	        } catch (Exception e) {
 	            throw new RuntimeException(e);
 	        }
@@ -83,10 +115,12 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
     public TextureWesterosCommon(T type, TextureInfo info, final int[] compactedDims, boolean conds, String defType, int defWidth, int defHeight) {
         super(type, info);
         // Set up base connection check
-        boolean ignoreStates = info.getInfo().flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
+        Optional<JsonObject> infoobj = info.getInfo();
+        boolean ignoreStates = infoobj.flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
+        String connect_to_tag = infoobj.flatMap(obj -> getString(obj, "connect_to_tag")).orElse(null);
         BiPredicate<Direction, BlockState> connChecks = info.getInfo().map(obj -> predicateParser.parse(obj.get("connect_to"))).orElse(null);
         // Add as base connection check
-        connectionChecks.add(new ConnectionCheck(0, ignoreStates, connChecks));
+        connectionChecks.add(new ConnectionCheck(0, ignoreStates, connChecks, connect_to_tag));
         
         if (conds) {
         	this.handler = new WesterosConditionHandler(info, compactedDims.length, connectionChecks, defType, defWidth, defHeight);
@@ -189,4 +223,20 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
 		}
 		return compacted + (row * getWidth(compactedDims[textureIndex])) + column;
 	}
+	
+
+	public static Optional<String> getString(JsonElement element) {
+		if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+			return Optional.of(element.getAsString());
+		}
+		return Optional.empty();
+	}
+
+	public static Optional<String> getString(JsonObject object, String memberName) {
+		if (object.has(memberName)) {
+			return getString(object.get(memberName));
+		}
+		return Optional.empty();
+	}
+
 }
