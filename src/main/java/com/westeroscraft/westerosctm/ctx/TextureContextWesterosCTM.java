@@ -114,37 +114,48 @@ public class TextureContextWesterosCTM extends TextureContextCommon {
 		return v;
 	}
 
+	private static final BlockState getCachedState(BlockState[] cache, BlockGetter world, BlockPos pos, int offX, int offY, int offZ) {
+		int off = (offX+1) + (3 * (offY+1)) + (9 * (offZ + 1));
+		BlockState bs = cache[off];
+		if (bs == null) {
+			bs = world.getBlockState(pos.offset(offX, offY, offZ));
+			cache[off] = bs;
+		}
+		return bs;
+	}
 	// Bits are N = (dX + 1) + 3*(dY + 1) + 9*(dZ + 1)
 	public static long[] buildCTMConnectionBits(BlockGetter world, BlockPos pos,
 			List<TextureWesterosCommon.ConnectionCheck> cclist) {
-		BlockState state = world.getBlockState(pos);
+		BlockState cache[] = new BlockState[27];	// 3 x 3 x 3, centered at pos
+		BlockState state = getCachedState(cache, world, pos, 0, 0, 0);
 		int cccnt = cclist.size();
 		long flags[] = new long[cccnt];
+	
 		for (Direction dir : Direction.values()) {
-			BlockPos p = pos.relative(dir);
+			int offX = dir.getStepX();
+			int offY = dir.getStepY();
+			int offZ = dir.getStepZ();
 			for (int i = 0; i < cccnt; i++) {
 				TextureWesterosCommon.ConnectionCheck tex = cclist.get(i);
 				// Get connection for primary direction
-				if (tex.connectTo(state, world.getBlockState(p), dir)) {
-					flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), dir.getStepY(), dir.getStepZ()));
+				if (tex.connectTo(state, getCachedState(cache, world, pos, offX, offY, offZ), dir)) {
+					flags[i] |= (1L << getCTMConenctionBit(offX, offY, offZ));
 				}
 				if (dir.getAxis() != Axis.Y) { // If side direction, check diagonals too (up and down)
-					if (tex.connectTo(state, world.getBlockState(p.above()), dir)) {
-						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.UP.getStepY(),
-								dir.getStepZ()));
+					if (tex.connectTo(state, getCachedState(cache, world, pos, offX, offY+1, offZ), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(offX, offY+1, offZ));
 					}
-					if (tex.connectTo(state, world.getBlockState(p.below()), dir)) {
-						flags[i] |= (1L << getCTMConenctionBit(dir.getStepX(), Direction.DOWN.getStepY(),
-								dir.getStepZ()));
+					if (tex.connectTo(state, getCachedState(cache, world, pos, offX, offY-1, offZ), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(offX, offY-1, offZ));
 					}
 				}
 				// If north/south, check horizontal diagonals too
 				if (dir.getAxis() == Axis.Z) {
-					if (tex.connectTo(state, world.getBlockState(p.east()), dir)) {
-						flags[i] |= (1L << getCTMConenctionBit(Direction.EAST.getStepX(), 0, dir.getStepZ()));
+					if (tex.connectTo(state, getCachedState(cache, world, pos, offX+1, offY, offZ), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(offX+1, offY, offZ));
 					}
-					if (tex.connectTo(state, world.getBlockState(p.west()), dir)) {
-						flags[i] |= (1L << getCTMConenctionBit(Direction.WEST.getStepX(), 0, dir.getStepZ()));
+					if (tex.connectTo(state, getCachedState(cache, world, pos, offX-1, offY, offZ), dir)) {
+						flags[i] |= (1L << getCTMConenctionBit(offX-1, offY, offZ));
 					}
 				}
 			}
