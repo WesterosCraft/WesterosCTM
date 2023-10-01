@@ -18,6 +18,7 @@ import static team.chisel.ctm.client.util.ConnectionLocations.DOWN;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.function.BiPredicate;
 
 import com.google.common.base.Preconditions;
@@ -58,7 +59,7 @@ public class WesterosConditionHandler {
     public static final String[] TYPES = new String[] { TYPE_HORIZONTAL, TYPE_PATTERN, TYPE_VERTICAL, TYPE_CTM, TYPE_CTM_PATTERN, TYPE_RANDOM,
     		TYPE_EDGES_FULL, TYPE_NULL, TYPE_OVERLAY };
     
-    private static final java.util.Random rand = new java.util.Random();
+    private static final ThreadLocal<Random> rand = ThreadLocal.withInitial(() -> new Random());
 
     private static class CondRule {
     	SrcTexture[] source = null;	// If defined, only apply rule to source textures with given texture index, column, row
@@ -392,15 +393,15 @@ public class WesterosConditionHandler {
 		    			txtOut = condIndex;
 	    			}
 	    			else if (TYPE_RANDOM.equals(r.type)) {
+	    				Random rnd = rand.get();
 						if (r.rndOffX == 0 && r.rndOffY == 0 && r.rndOffZ == 0) {
-	    					rand.setSeed(pos.asLong());
-				            rand.setSeed(Mth.getSeed(pos) + (r.rndSameAllSides ? 0 : dir.ordinal()));
+				            rnd.setSeed(Mth.getSeed(pos) + (r.rndSameAllSides ? 0 : dir.ordinal()));
 	    				}
 	    				else {	// Apply offset, if nonzero
-				            rand.setSeed(Mth.getSeed(pos.getX() + r.rndOffX, pos.getY() + r.rndOffY, pos.getZ() + r.rndOffZ) + (r.rndSameAllSides ? 0 : dir.ordinal()));
+				            rnd.setSeed(Mth.getSeed(pos.getX() + r.rndOffX, pos.getY() + r.rndOffY, pos.getZ() + r.rndOffZ) + (r.rndSameAllSides ? 0 : dir.ordinal()));
 	    				}
-			            rand.nextBoolean();
-	    				int w = rand.nextInt(r.weightTotal);
+			            rnd.nextBoolean();
+	    				int w = rnd.nextInt(r.weightTotal);
 	    				int rowcol = 0;
 	    				for (int idx = 0; idx < r.weights.length; idx++) {
 	    					w = w - r.weights[idx];
