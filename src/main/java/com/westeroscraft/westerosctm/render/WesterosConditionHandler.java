@@ -287,6 +287,7 @@ public class WesterosConditionHandler {
     	boolean ignoreStates = false;
     	BiPredicate<Direction, BlockState> connCheck = null;
     	String connect_to_tag = null;
+			String connect_to_state = null;
     	if (crec.has("ignore_states")) {
             Preconditions.checkArgument(crec.get("ignore_states").isJsonPrimitive() && crec.get("ignore_states").getAsJsonPrimitive().isBoolean(), "ignore_states must be a boolean");    		
             ignoreStates = crec.get("ignore_states").getAsBoolean();    		
@@ -300,8 +301,12 @@ public class WesterosConditionHandler {
     		connect_to_tag = crec.get("connect_to_tag").getAsString();
             newConn = true;
     	}
+			if (crec.has("connect_to_state")) {
+				connect_to_state = crec.get("connect_to_state").getAsString();
+						newConn = true;
+			}
     	if (newConn) {	// If new settings, assign new index
-    		crule.connCheck = new ConnectionCheck(connectionChecks.size(), ignoreStates, connCheck, connect_to_tag);
+    		crule.connCheck = new ConnectionCheck(connectionChecks.size(), ignoreStates, connCheck, connect_to_tag, connect_to_state);
     		connectionChecks.add(crule.connCheck);
     	}
     	else {
