@@ -15,6 +15,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
 import team.chisel.ctm.api.texture.ISubmap;
 import team.chisel.ctm.api.texture.ITextureContext;
@@ -60,14 +61,16 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
 	public static class ConnectionCheck implements ITextureWesterosConnectTo {
 		private final boolean ignoreStates;
 		private final TagKey<Block> connTag;
+		private final String connState;
 		public final int connIndex;
 		private ConnectToFunction func;
 		@Nullable
 		private final BiPredicate<Direction, BlockState> connectionChecks;
-		public ConnectionCheck(int connIndex, boolean ignore, BiPredicate<Direction, BlockState> conncheck, String connTag) {
+		public ConnectionCheck(int connIndex, boolean ignore, BiPredicate<Direction, BlockState> conncheck, String connTag, String connState) {
 			this.connIndex = connIndex;
 			this.ignoreStates = ignore;
 			this.connectionChecks = conncheck;
+			this.connState = connState;
 			TagKey<Block> ct = null;
 			if (connTag != null) {
 				String[] parts = connTag.split(":");
@@ -86,6 +89,14 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
 			}
 			else if (connTag != null) {
 				func = (from, to, dir) -> from.is(ConnectionCheck.this.connTag) && to.is(ConnectionCheck.this.connTag);
+			}
+			else if (connState != null) {
+				func = (from, to, dir) -> {
+					Property<?> p = from.getBlock().getStateDefinition().getProperty(this.connState);
+					if (p == null || !from.hasProperty(p) || !to.hasProperty(p))
+						return false;
+					return (from.getBlock() == to.getBlock() && from.getValue(p).equals(to.getValue(p)));
+				};
 			}
 			else if (this.ignoreStates) {
 				func = (from, to, dir) -> from.getBlock() == to.getBlock();
@@ -118,9 +129,10 @@ public class TextureWesterosCommon<T extends ITextureType> extends AbstractTextu
         Optional<JsonObject> infoobj = info.getInfo();
         boolean ignoreStates = infoobj.flatMap(obj -> ParseUtils.getBoolean(obj, "ignore_states")).orElse(false);
         String connect_to_tag = infoobj.flatMap(obj -> getString(obj, "connect_to_tag")).orElse(null);
+				String connect_to_state = infoobj.flatMap(obj -> getString(obj, "connect_to_state")).orElse(null);
         BiPredicate<Direction, BlockState> connChecks = info.getInfo().map(obj -> predicateParser.parse(obj.get("connect_to"))).orElse(null);
         // Add as base connection check
-        connectionChecks.add(new ConnectionCheck(0, ignoreStates, connChecks, connect_to_tag));
+        connectionChecks.add(new ConnectionCheck(0, ignoreStates, connChecks, connect_to_tag, connect_to_state));
         
         if (conds) {
         	this.handler = new WesterosConditionHandler(info, compactedDims.length, connectionChecks, defType, defWidth, defHeight);
